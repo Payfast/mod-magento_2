@@ -27,6 +27,8 @@ define(
             defaults: {
                 template: 'Payfast_Payfast/payment/payfast'
             },
+            redirectAfterPlaceOrder: false,
+
             getCode: function() {
                 return 'payfast';
             },

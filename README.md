@@ -1,6 +1,6 @@
 # mod-magento_2
 
-PayFast Magento Module v1.0 for Magento v2.0
+PayFast Magento Module v1.1.0 for Magento v2.0 - 2.1.3
 -----------------------------------------------------------------------------
 Copyright (c) 2016 PayFast (Pty) Ltd
 
@@ -28,7 +28,7 @@ General Public License.
 *                                                                            *
 ******************************************************************************
 
-In order to use PayFast with Magento 2.0.* you will need a working Magento 2.0.* installation. To install PayFast follow the below instructions:
+In order to use PayFast with Magento 2.*.3 you will need a working Magento 2.*.3 installation. To install PayFast follow the below instructions:
 
 1. Setup ZAR on your Magento site.
     In the admin panel navigate to 'Stores', and add ZAR under currency Symbols and Rates.

@@ -293,22 +293,6 @@ class Payfast extends \Magento\Payment\Model\Method\AbstractMethod
     }
 
     /**
-     * Place an order with authorization or capture action
-     *
-     * @param Payment $payment
-     * @param float $amount
-     *
-     * @return $this
-     */
-    protected function _placeOrder( Payment $payment, $amount )
-    {
-
-        $pre = __METHOD__ . " : ";
-        $this->_logger->debug( $pre . 'bof' );
-
-    }
-
-    /**
      * this where we compile data posted by the form to payfast
      * @return array
      */
@@ -342,7 +326,7 @@ class Payfast extends \Magento\Payment\Model\Method\AbstractMethod
             $description .= $this->getNumberFormat( $items->getQtyOrdered() ) . ' x ' . $items->getName() .';';
         }
 
-        $pfDescription = trim(substr( $description, 0, 254 ));
+        $pfDescription = trim( substr( $description, 0, 254 ) );
 
         // Construct data for the form
         $data = array(
@@ -362,7 +346,8 @@ class Payfast extends \Magento\Payment\Model\Method\AbstractMethod
             'm_payment_id' => $order->getRealOrderId(),
             'amount' => $this->getTotalAmount( $order ),
             'item_name' => $this->_storeManager->getStore()->getName() .', Order #'. $order->getRealOrderId(),
-            'item_description' => $pfDescription,
+             //this html special characters breaks signature.
+            //'item_description' => $pfDescription,
         );
 
         $pfOutput = '';
@@ -388,12 +373,25 @@ class Payfast extends \Magento\Payment\Model\Method\AbstractMethod
         $pfSignature = md5( $pfOutput );
 
         $data['signature'] = $pfSignature;
-        $data['user_agent'] = 'Magento 2.0';
+        $data['user_agent'] = 'Magento ' . $this->getAppVersion();
         pflog( $pre . 'data is :'. print_r( $data, true ) );
+        $this->logger->debug( $data );
+
         return( $data );
     }
 
+    /**
+     * getAppVersion
+     *
+     * @return string
+     */
+    private function getAppVersion()
+    {
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $version = $objectManager->get('Magento\Framework\App\ProductMetadataInterface')->getVersion();
 
+        return  (preg_match('([0-9])', $version )) ? $version : '2.0.0';
+    }
     /**
      * getTotalAmount
      */

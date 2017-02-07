@@ -24,7 +24,6 @@
                                                         <item name="children" xsi:type="array">
                                                                 <item name="payfast-payments" xsi:type="array">
                                                                     <item name="component" xsi:type="string">Payfast_Payfast/js/view/payment/payfast-payments</item>
-                                                                    <!--<item name="images" xsi:type="string">Lefu_Payfast/images/logo</item>-->
                                                                     <item name="methods" xsi:type="array">
                                                                         <item name="payfast" xsi:type="array">
                                                                             <item name="isBillingAddressRequired" xsi:type="boolean">true</item>

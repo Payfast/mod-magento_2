@@ -66,7 +66,7 @@ class Form extends \Magento\Payment\Block\Form
     /**
      * Set template and redirect message
      *
-     * @return null
+     * @return void
      */
     protected function _construct()
     {
@@ -79,7 +79,7 @@ class Form extends \Magento\Payment\Block\Form
     /**
      * Payment method code getter
      *
-     * @return string
+     * @return string  'payfast'
      */
     public function getMethodCode()
     {

@@ -1,0 +1,17 @@
+{
+    "name": "payfast/payfast",
+    "description": "Payfast Module - Tested up to Magento v2.1.3",
+    "license": "proprietary",
+    "homepage": "https://www.payfast.co.za",
+    "authors":
+    [
+        {
+            "name": "Jonathan Smit",
+            "role": "Founder/Owner"
+        }
+    ],
+    "support":
+    {
+        "email": "developers@payfast.co.za"
+    }
+}
