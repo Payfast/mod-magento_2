@@ -1,6 +1,6 @@
 # mod-magento_2
 
-PayFast Magento Module v1.1.0 for Magento v2.0 - 2.1.3
+PayFast Magento Module v1.1.1 for Magento v2.0 - 2.1.3
 -----------------------------------------------------------------------------
 Copyright (c) 2016 PayFast (Pty) Ltd
 

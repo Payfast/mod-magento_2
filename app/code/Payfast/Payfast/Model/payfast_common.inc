@@ -158,13 +158,15 @@ function pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase
     // Remove the last '&' from the parameter string
     $pfParamString = substr( $pfParamString, 0, -1 );
 
-    if( empty($serverMode) && (is_null( $pfPassphrase ) ||  $serverMode != 'live') )
+    if( !is_null( $pfPassphrase ) && $serverMode == 'live' )
     {
-        $tempParamString = $pfParamString;
+        //if server mode is live and a passphrase is set
+        $tempParamString = $pfParamString."&passphrase=".urlencode( $pfPassphrase );
     }
     else
     {
-        $tempParamString = $pfParamString."&passphrase=".urlencode( $pfPassphrase );
+        //if server mode is not live or a passphrase is not set
+        $tempParamString = $pfParamString;
     }
 
     $signature = md5( $tempParamString );
