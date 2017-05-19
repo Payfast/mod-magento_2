@@ -7,11 +7,10 @@ You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin
 Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
 
 ******************************************************************************
-*                                                                            *
-*    Please see the URL below for all information concerning this module:    *
-*                                                                            *
-*             https://www.payfast.co.za/shopping-carts/magento/              *
-*                                                                            *
+                                                                            
+    Please see the URL below for all information concerning this module:
+
+             https://www.payfast.co.za/shopping-carts/magento/
 ******************************************************************************
 
 In order to use PayFast with Magento 2.*.3 you will need a working Magento 2.*.3 installation. To install PayFast follow the below instructions:
