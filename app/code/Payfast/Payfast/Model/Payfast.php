@@ -357,7 +357,7 @@ class Payfast extends \Magento\Payment\Model\Method\AbstractMethod
         {
             if (!empty( $val ))
             {
-                $pfOutput .= $key .'='. urlencode( $val ) .'&';
+                $pfOutput .= $key .'='. urlencode( trim( $val ) ) .'&';
             }
         }
 
