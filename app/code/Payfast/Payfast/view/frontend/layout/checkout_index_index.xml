@@ -1,36 +1,45 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
 -->
-<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-<body>
-    <referenceBlock name="checkout.root">
-        <arguments>
-            <argument name="jsLayout" xsi:type="array">
-                <item name="components" xsi:type="array">
-                    <item name="checkout" xsi:type="array">
-                        <item name="children" xsi:type="array">
-                            <item name="steps" xsi:type="array">
-                                <item name="children" xsi:type="array">
-                                    <item name="billing-step" xsi:type="array">
-                                        <item name="children" xsi:type="array">
-                                            <item name="payment" xsi:type="array">
-                                                <item name="children" xsi:type="array">
-                                                    <item name="renders" xsi:type="array">
-                                                        <!-- merge payment method renders here -->
-                                                        <item name="children" xsi:type="array">
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Payfast_Payfast::css/payfast_checkout.css"/>
+    </head>
+    <body>
+        <referenceBlock name="checkout.root">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="checkout" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="steps" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="billing-step" xsi:type="array">
+                                            <item name="children" xsi:type="array">
+                                                <item name="payment" xsi:type="array">
+                                                    <item name="children" xsi:type="array">
+                                                        <item name="renders" xsi:type="array">
+                                                            <!-- merge payment method renders here -->
+                                                            <item name="children" xsi:type="array">
                                                                 <item name="payfast-payments" xsi:type="array">
-                                                                    <item name="component" xsi:type="string">Payfast_Payfast/js/view/payment/payfast-payments</item>
+                                                                    <item name="component" xsi:type="string">
+                                                                        Payfast_Payfast/js/view/payment/payfast-payments
+                                                                    </item>
                                                                     <item name="methods" xsi:type="array">
                                                                         <item name="payfast" xsi:type="array">
-                                                                            <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
+                                                                            <item name="isBillingAddressRequired"
+                                                                                  xsi:type="boolean">true
+                                                                            </item>
                                                                         </item>
                                                                     </item>
                                                                 </item>
+                                                            </item>
                                                         </item>
                                                     </item>
                                                 </item>
@@ -41,9 +50,8 @@
                             </item>
                         </item>
                     </item>
-                </item>
-            </argument>
-        </arguments>
-    </referenceBlock>
-</body>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
 </page>

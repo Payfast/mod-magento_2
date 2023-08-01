@@ -1,8 +1,9 @@
-<?php namespace Payfast\Payfast\Gateway\Request;
+<?php
+namespace Payfast\Payfast\Gateway\Request;
 
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
 
@@ -34,7 +35,7 @@ class AuthorizationRequest implements BuilderInterface
     /**
      * @param ConfigInterface $config
      * @param LoggerInterface $logger
-     * @param Config          $payfastConfig
+     * @param Config $payfastConfig
      */
     public function __construct(ConfigInterface $config, LoggerInterface $logger, Config $payfastConfig)
     {
@@ -49,13 +50,14 @@ class AuthorizationRequest implements BuilderInterface
      * if this was a cc payment then we would append cc fields in and dispatch it.
      * Builds ENV request
      *
-     * @param  array $buildSubject
+     * @param array $buildSubject
+     *
      * @return array
      * @throws \Exception
      */
     public function build(array $buildSubject)
     {
-        $pre  = __METHOD__ . ' : ';
+        $pre = __METHOD__ . ' : ';
 
         $this->logger->debug($pre . 'bof');
 
@@ -71,50 +73,50 @@ class AuthorizationRequest implements BuilderInterface
 
             $address = $order->getBillingAddress();
 
-            $merchantId = $this->config->getValue('merchant_id', $order->getStoreId());
+            $merchantId  = $this->config->getValue('merchant_id', $order->getStoreId());
             $merchantKey = $this->config->getValue('merchant_key', $order->getStoreId());
-            $data = [
+            $data        = [
                 // Merchant details
-                'merchant_id' => $merchantId,
-                'merchant_key' => $merchantKey,
-                'return_url' => $this->payfastConfig->getPaidSuccessUrl(),
-                'cancel_url' => $this->payfastConfig->getPaidCancelUrl(),
-                'notify_url' => $this->payfastConfig->getPaidNotifyUrl(),
+                'merchant_id'   => $merchantId,
+                'merchant_key'  => $merchantKey,
+                'return_url'    => $this->payfastConfig->getPaidSuccessUrl(),
+                'cancel_url'    => $this->payfastConfig->getPaidCancelUrl(),
+                'notify_url'    => $this->payfastConfig->getPaidNotifyUrl(),
 
                 // Buyer details
-                'name_first' => $address->getFirstname(),
-                'name_last' => $address->getLastname(),
+                'name_first'    => $address->getFirstname(),
+                'name_last'     => $address->getLastname(),
                 'email_address' => $address->getEmail(),
 
                 // Item details
-                'm_payment_id' => $order->getOrderIncrementId(),
-                'amount' => $order->getGrandTotalAmount(),
+                'm_payment_id'  => $order->getOrderIncrementId(),
+                'amount'        => $order->getGrandTotalAmount(),
 
                 // 'item_name' => $this->_storeManager->getStore()->getName() .', Order #'. $order->getOrderIncrementId(),
-                'item_name' => 'Order #' . $order->getOrderIncrementId(),
-                'currency' => $order->getCurrencyCode(),
+                'item_name'     => 'Order #' . $order->getOrderIncrementId(),
+                'currency'      => $order->getCurrencyCode(),
 
             ];
-            $pfOutput = '';
+            $pfOutput    = '';
             // Create output string
             foreach ($data as $key => $val) {
-                if (!empty($val)) {
+                if (!empty($val) && $key !== 'currency') {
                     $pfOutput .= $key . '=' . urlencode($val) . '&';
                 }
             }
 
-            $passPhrase = $this->config->getValue('passphrase', $order->getStoreId());
-            $pfOutput = substr($pfOutput, 0, -1);
-
-            if (!empty($passPhrase) && $this->config->getValue('server', $order->getStoreId()) !== 'test') {
-                $pfOutput = $pfOutput . "&passphrase=" . urlencode($passPhrase);
+            $passPhrase = $this->config->getValue('passphrase', $order->getStoreId()) ?? '';
+            if (!empty($passPhrase)) {
+                $pfOutput .= 'passphrase=' . urlencode($passPhrase);
+            } else {
+                $pfOutput = rtrim($pfOutput, '&');
             }
 
             $this->logger->debug($pre . 'pfOutput for signature is : ' . $pfOutput);
 
             $pfSignature = md5($pfOutput);
 
-            $data['signature'] = $pfSignature;
+            $data['signature']  = $pfSignature;
             $data['user_agent'] = 'Magento ' . $this->getAppVersion();
 
             $this->logger->debug($pre . 'generated  signature : ' . $data['signature']);
@@ -136,8 +138,8 @@ class AuthorizationRequest implements BuilderInterface
     private function getAppVersion()
     {
         $objectManager = ObjectManager::getInstance();
-        $version = $objectManager->get('Magento\Framework\App\ProductMetadataInterface')->getVersion();
+        $version       = $objectManager->get('Magento\Framework\App\ProductMetadataInterface')->getVersion();
 
-        return  (preg_match('([0-9])', $version)) ? $version : '2.0.0';
+        return (preg_match('([0-9])', $version)) ? $version : '2.0.0';
     }
 }

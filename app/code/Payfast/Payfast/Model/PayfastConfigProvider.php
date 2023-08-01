@@ -1,9 +1,10 @@
 <?php
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
+
 namespace Payfast\Payfast\Model;
 
 use Magento\Checkout\Model\ConfigProviderInterface;
@@ -38,7 +39,7 @@ class PayfastConfigProvider implements ConfigProviderInterface
     protected $_logger;
 
     /**
-     * @var PayfastHelper 
+     * @var PayfastHelper
      */
     protected $payfastHelper;
 
@@ -60,12 +61,12 @@ class PayfastConfigProvider implements ConfigProviderInterface
     protected $paymentHelper;
 
     /**
-     * @param LoggerInterface   $logger
-     * @param ConfigFactory     $configFactory
+     * @param LoggerInterface $logger
+     * @param ConfigFactory $configFactory
      * @param ResolverInterface $localeResolver
-     * @param CurrentCustomer   $currentCustomer
-     * @param PayfastHelper     $payfastHelper
-     * @param PaymentHelper     $paymentHelper
+     * @param CurrentCustomer $currentCustomer
+     * @param PayfastHelper $payfastHelper
+     * @param PaymentHelper $paymentHelper
      *
      * @throws LocalizedException
      */
@@ -78,14 +79,14 @@ class PayfastConfigProvider implements ConfigProviderInterface
         PaymentHelper $paymentHelper
     ) {
         $this->_logger = $logger;
-        $pre = __METHOD__ . ' : ';
+        $pre           = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
 
-        $this->localeResolver = $localeResolver;
-        $this->config = $configFactory->create();
+        $this->localeResolver  = $localeResolver;
+        $this->config          = $configFactory->create();
         $this->currentCustomer = $currentCustomer;
-        $this->payfastHelper = $payfastHelper;
-        $this->paymentHelper = $paymentHelper;
+        $this->payfastHelper   = $payfastHelper;
+        $this->paymentHelper   = $paymentHelper;
 
         foreach ($this->methodCodes as $code) {
             $this->methods[$code] = $this->paymentHelper->getMethodInstance($code);
@@ -104,7 +105,7 @@ class PayfastConfigProvider implements ConfigProviderInterface
         $config = [
             'payment' => [
                 'payfast' => [
-                    'paymentAcceptanceMarkSrc' => $this->config->getPaymentMarkImageUrl(),
+                    'paymentAcceptanceMarkSrc'  => $this->config->getPaymentMarkImageUrl(),
                     'paymentAcceptanceMarkHref' => $this->config->getPaymentMarkWhatIsPayfast(),
                 ]
             ]
@@ -112,20 +113,22 @@ class PayfastConfigProvider implements ConfigProviderInterface
 
         foreach ($this->methodCodes as $code) {
             if ($this->methods[$code]->isAvailable()) {
-                $config['payment']['payfast']['redirectUrl'][$code] = $this->getMethodRedirectUrl($code);
+                $config['payment']['payfast']['redirectUrl'][$code]          = $this->getMethodRedirectUrl($code);
                 $config['payment']['payfast']['billingAgreementCode'][$code] = $this->getBillingAgreementCode($code);
 
                 $config['payment']['payfast']['isActive'][$code] = $this->config->isActive();
             }
         }
         $this->_logger->debug($pre . 'eof', $config);
+
         return $config;
     }
 
     /**
      * Return redirect URL for method
      *
-     * @param  string $code
+     * @param string $code
+     *
      * @return mixed
      */
     protected function getMethodRedirectUrl($code)
@@ -137,13 +140,15 @@ class PayfastConfigProvider implements ConfigProviderInterface
         $methodUrl = $this->config->getCheckoutRedirectUrl();
 
         $this->_logger->debug($pre . 'eof');
+
         return $methodUrl;
     }
 
     /**
      * Return billing agreement code for method
      *
-     * @param  string $code
+     * @param string $code
+     *
      * @return null|string
      */
     protected function getBillingAgreementCode($code)

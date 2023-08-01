@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
 
@@ -37,9 +37,8 @@ use Payfast\Payfast\Model\Payfast;
 use Psr\Log\LoggerInterface;
 
 /**
- * Abstract PayFast Checkout Controller
+ * Abstract Payfast Checkout Controller
  */
-
 abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterface
 {
     /**
@@ -54,8 +53,8 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
     protected $_checkoutTypes = [];
 
     /**
-    * @var ObjectManagerInterface and I could place this as property type but it will break lower php versions
-    */
+     * @var ObjectManagerInterface and I could place this as property type but it will break lower php versions
+     */
     protected $_objectManager;
     /**
      * @var Config
@@ -211,29 +210,29 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
         $this->_logger = $logger;
 
         $this->_logger->debug($pre . 'bof');
-        $this->_request = $context->getRequest();
-        $this->_response = $context->getResponse();
-        $this->customerSession = $customerSession;
-        $this->checkoutSession = $checkoutSession;
-        $this->orderFactory = $orderFactory;
-        $this->_payfastSession = $payfastSession;
-        $this->urlHelper = $urlHelper;
-        $this->orderResourceModel = $orderResourceModel;
-        $this->pageFactory = $pageFactory;
-        $this->transactionFactory = $transactionFactory;
-        $this->paymentMethod = $paymentMethod;
-        $this->orderSender = $orderSender;
-        $this->invoiceSender = $invoiceSender;
+        $this->_request                      = $context->getRequest();
+        $this->_response                     = $context->getResponse();
+        $this->customerSession               = $customerSession;
+        $this->checkoutSession               = $checkoutSession;
+        $this->orderFactory                  = $orderFactory;
+        $this->_payfastSession               = $payfastSession;
+        $this->urlHelper                     = $urlHelper;
+        $this->orderResourceModel            = $orderResourceModel;
+        $this->pageFactory                   = $pageFactory;
+        $this->transactionFactory            = $transactionFactory;
+        $this->paymentMethod                 = $paymentMethod;
+        $this->orderSender                   = $orderSender;
+        $this->invoiceSender                 = $invoiceSender;
         $this->salesTransactionResourceModel = $salesTransactionResourceModel;
-        $this->rawResult = $rawResult;
-        $parameters = ['params' => [$this->_configMethod]];
-        $this->_objectManager = $context->getObjectManager();
-        $this->_url = $context->getUrl();
-        $this->_actionFlag = $context->getActionFlag();
-        $this->_redirect = $context->getRedirect();
-        $this->_response = $context->getResponse();
-        $this->_actionFlag = $context->getActionFlag();
-        $this->messageManager = $context->getMessageManager();
+        $this->rawResult                     = $rawResult;
+        $parameters                          = ['params' => [$this->_configMethod]];
+        $this->_objectManager                = $context->getObjectManager();
+        $this->_url                          = $context->getUrl();
+        $this->_actionFlag                   = $context->getActionFlag();
+        $this->_redirect                     = $context->getRedirect();
+        $this->_response                     = $context->getResponse();
+        $this->_actionFlag                   = $context->getActionFlag();
+        $this->messageManager                = $context->getMessageManager();
 
         $this->_config = $this->_objectManager->create($this->_configType, $parameters);
 
@@ -255,85 +254,6 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
     public function getConfigData($field)
     {
         return $this->_config->getValue($field);
-    }
-
-    /**
-     * Instantiate
-     *
-     * @return void
-     * @throws LocalizedException
-     */
-    protected function _initCheckout()
-    {
-        $pre = __METHOD__ . " : ";
-        $this->_logger->debug($pre . 'bof');
-
-        $this->checkoutSession->loadCustomerQuote();
-
-        $this->_order = $this->checkoutSession->getLastRealOrder();
-
-        if (!$this->_order->getId()) {
-            $phrase = __('We could not find "Order" for processing');
-            $this->_logger->critical($pre . $phrase);
-
-            $this->getResponse()->setStatusHeader(404, '1.1', 'Not found');
-            throw new LocalizedException($phrase);
-        }
-
-        if ($this->_order->getState() != \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT) {
-            $this->_logger->debug($pre . 'updating order state and status');
-
-            $this->_order->setStatus(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
-            $this->_order->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
-
-            $this->orderResourceModel->save($this->_order);
-        }
-
-        if ($this->_order->getQuoteId()) {
-            $this->checkoutSession->setPayfastQuoteId($this->checkoutSession->getQuoteId());
-            $this->checkoutSession->setPayfastSuccessQuoteId($this->checkoutSession->getLastSuccessQuoteId());
-            $this->checkoutSession->setPayfastRealOrderId($this->checkoutSession->getLastRealOrderId());
-            $quote = $this->checkoutSession->getQuote()->setIsActive(false);
-            /** @var QuoteRepository $quoteRepository */
-            $quoteRepository = $this->_objectManager->get(QuoteRepository::class);
-            $quoteRepository->save($quote);
-        }
-
-        $this->_logger->debug($pre . 'eof');
-    }
-
-    /**
-     * PayFast session instance getter
-     *
-     * @return Generic
-     */
-    protected function _getSession() : Generic
-    {
-        return $this->_payfastSession;
-    }
-
-    /**
-     * Return checkout session object
-     *
-     * @return \Magento\Checkout\Model\Session
-     */
-    protected function _getCheckoutSession()
-    {
-        return $this->checkoutSession;
-    }
-
-    /**
-     * Return checkout quote object
-     *
-     * @return Quote
-     */
-    protected function _getQuote()
-    {
-        if (!$this->_quote) {
-            $this->_quote = $this->_getCheckoutSession()->getQuote();
-        }
-
-        return $this->_quote;
     }
 
     /**
@@ -391,15 +311,96 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
     }
 
     /**
+     * Instantiate
+     *
+     * @return void
+     * @throws LocalizedException
+     */
+    protected function _initCheckout()
+    {
+        $pre = __METHOD__ . " : ";
+        $this->_logger->debug($pre . 'bof');
+
+        $this->checkoutSession->loadCustomerQuote();
+
+        $this->_order = $this->checkoutSession->getLastRealOrder();
+
+        if (!$this->_order->getId()) {
+            $phrase = __('We could not find "Order" for processing');
+            $this->_logger->critical($pre . $phrase);
+
+            $this->getResponse()->setStatusHeader(404, '1.1', 'Not found');
+            throw new LocalizedException($phrase);
+        }
+
+        if ($this->_order->getState() != \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT) {
+            $this->_logger->debug($pre . 'updating order state and status');
+
+            $this->_order->setStatus(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
+            $this->_order->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
+
+            $this->orderResourceModel->save($this->_order);
+        }
+
+        if ($this->_order->getQuoteId()) {
+            $this->checkoutSession->setPayfastQuoteId($this->checkoutSession->getQuoteId());
+            $this->checkoutSession->setPayfastSuccessQuoteId($this->checkoutSession->getLastSuccessQuoteId());
+            $this->checkoutSession->setPayfastRealOrderId($this->checkoutSession->getLastRealOrderId());
+            $quote = $this->checkoutSession->getQuote()->setIsActive(false);
+            /** @var QuoteRepository $quoteRepository */
+            $quoteRepository = $this->_objectManager->get(QuoteRepository::class);
+            $quoteRepository->save($quote);
+        }
+
+        $this->_logger->debug($pre . 'eof');
+    }
+
+    /**
+     * Payfast session instance getter
+     *
+     * @return Generic
+     */
+    protected function _getSession(): Generic
+    {
+        return $this->_payfastSession;
+    }
+
+    /**
+     * Return checkout session object
+     *
+     * @return \Magento\Checkout\Model\Session
+     */
+    protected function _getCheckoutSession()
+    {
+        return $this->checkoutSession;
+    }
+
+    /**
+     * Return checkout quote object
+     *
+     * @return Quote
+     */
+    protected function _getQuote()
+    {
+        if (!$this->_quote) {
+            $this->_quote = $this->_getCheckoutSession()->getQuote();
+        }
+
+        return $this->_quote;
+    }
+
+    /**
      * Used to be part of inherited abstractAction now we need to code it in.
      *
      * @param $path
      * @param array $arguments
+     *
      * @return ResponseInterface
      */
-    protected function _redirect($path, $arguments = []) : ResponseInterface
+    protected function _redirect($path, $arguments = []): ResponseInterface
     {
         $this->_redirect->redirect($this->getResponse(), $path, $arguments);
+
         return $this->getResponse();
     }
 

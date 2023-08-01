@@ -1,74 +1,102 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="payment">
-            <group id="payfast" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="payfast" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
                 <label>Payfast</label>
-                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"
+                       showInStore="0">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
 
-                <field id="title" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="title" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Title</label>
                 </field>
-                <field id="debug" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="debug" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1"
+                       showInStore="0">
                     <label>Enable Payfast Debug Log</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Log request data to payfast.log, should be set to "No" when site is live</comment>
                 </field>
 
-                <field id="allowed_confirmation_email" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="allowed_confirmation_email" translate="label" type="select" sortOrder="21" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
                     <label>Send Order Confirmation email</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>when enabled this will send order confirmation email after successful payment</comment>
                 </field>
 
-                <field id="allowed_invoice_email" translate="label" type="select" sortOrder="22" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="allowed_invoice_email" translate="label" type="select" sortOrder="22" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
                     <label>Send Invoice email</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>when enabled this will send invoice email after successful payment</comment>
                 </field>
 
-                <field id="server" translate="label" type="text" sortOrder="23" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="server" translate="label" type="text" sortOrder="23" showInDefault="1" showInWebsite="1"
+                       showInStore="0">
                     <label>server</label>
-                    <comment> test or live - enter "test" to test the integration with PayFast sandbox; enter "live" when ready to perfrom live transactions.</comment>
+                    <comment>test or live - enter "test" to test the integration with Payfast sandbox; enter "live" when
+                        ready to perfrom live transactions.
+                    </comment>
                 </field>
-                <field id="merchant_key" translate="label" type="text" sortOrder="36" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="merchant_key" translate="label" type="text" sortOrder="36" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
                     <label>Merchant Key</label>
 
                 </field>
-                <field id="passphrase" translate="label" type="text" sortOrder="37" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="passphrase" translate="label" type="text" sortOrder="37" showInDefault="1" showInWebsite="1"
+                       showInStore="0">
                     <label>Passphrase</label>
-                    <comment>If passphrase set, ensure the identical passphrase is set on your PayFast account</comment>
+                    <comment>If passphrase set, ensure the identical passphrase is set on your Payfast account</comment>
                 </field>
-                <field id="merchant_id" translate="label" type="text" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="merchant_id" translate="label" type="text" sortOrder="35" showInDefault="1" showInWebsite="1"
+                       showInStore="0">
                     <label>Merchant ID</label>
                 </field>
-                <field id="allowed_carrier" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="allowed_carrier" translate="label" type="multiselect" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
                     <label>Allowed Shipping Methods</label>
                     <source_model>Magento\Shipping\Model\Config\Source\Allmethods</source_model>
                 </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="40" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
                     <label>Payment from Applicable Countries</label>
                     <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
                 </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="41" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="41" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
                     <label>Payment from Specific Countries</label>
                     <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                     <can_be_empty>1</can_be_empty>
                 </field>
-                <field id="instructions" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="instructions" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Instructions</label>
                 </field>
-                <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="successful_order_status" translate="label" type="select" sortOrder="45" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Successful Order Status</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
+                <field id="successful_order_state" translate="label" type="select" sortOrder="45" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Successful Order State</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
+                <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1"
+                       showInStore="0">
                     <label>Sort Order</label>
                     <frontend_class>validate-number</frontend_class>
                 </field>

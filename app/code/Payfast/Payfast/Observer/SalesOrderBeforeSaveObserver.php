@@ -1,10 +1,12 @@
-<?php namespace Payfast\Payfast\Observer;
+<?php
+namespace Payfast\Payfast\Observer;
 
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
+
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -30,7 +32,8 @@ class SalesOrderBeforeSaveObserver implements ObserverInterface
      * born out of necessity to force order status to not be in processing.
      * provided that user has not paid.
      *
-     * @param  Observer $observer
+     * @param Observer $observer
+     *
      * @return $this
      * @throws LocalizedException
      */
@@ -40,12 +43,12 @@ class SalesOrderBeforeSaveObserver implements ObserverInterface
         $this->_logger->debug($pre . 'bof');
 
         /**
- * @var Order $order 
-*/
+         * @var Order $order
+         */
         $order = $observer->getEvent()->getOrder();
 
-        if ($order->getPayment()->getMethodInstance()->getCode() == Config::METHOD_CODE 
-            && $order->getState() == Order::STATE_PROCESSING 
+        if ($order->getPayment()->getMethodInstance()->getCode() == Config::METHOD_CODE
+            && $order->getState() == Order::STATE_PROCESSING
             && empty($order->getPayment()->getAdditionalInformation('pf_payment_id'))
         ) {
             $this->_logger->debug($pre . 'setting order status and preventing sending of emails.');
@@ -63,9 +66,12 @@ class SalesOrderBeforeSaveObserver implements ObserverInterface
         $this->_logger->debug('order status : ' . $order->getStatus());
         $this->_logger->debug('order state : ' . $order->getState());
 
-        $this->_logger->debug($pre . "pf_payment_id is : ( {$order->getPayment()->getAdditionalInformation('pf_payment_id')} )");
+        $this->_logger->debug(
+            $pre . "pf_payment_id is : ( {$order->getPayment()->getAdditionalInformation('pf_payment_id')} )"
+        );
 
         $this->_logger->debug($pre . 'eof');
+
         return $this;
     }
 }

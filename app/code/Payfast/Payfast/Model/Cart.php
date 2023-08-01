@@ -1,9 +1,10 @@
 <?php
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
+
 namespace Payfast\Payfast\Model;
 
 /**
@@ -44,6 +45,22 @@ class Cart extends \Magento\Payment\Model\Cart
     }
 
     /**
+     * Check whether any item has negative amount
+     *
+     * @return bool
+     */
+    public function hasNegativeItemAmount()
+    {
+        foreach ($this->_customItems as $item) {
+            if ($item->getAmount() < 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Calculate subtotal from custom items
      *
      * @return void
@@ -57,13 +74,13 @@ class Cart extends \Magento\Payment\Model\Cart
     }
 
     /**
-     * Check the line items and totals according to PayFast business logic limitations
+     * Check the line items and totals according to Payfast business logic limitations
      *
      * @return void
      */
     protected function _validate()
     {
-        $areItemsValid = false;
+        $areItemsValid          = false;
         $this->_areAmountsValid = false;
 
         $referenceAmount = $this->_salesModel->getDataUsingMethod('base_grand_total');
@@ -81,7 +98,6 @@ class Cart extends \Magento\Payment\Model\Cart
 
         if (empty($this->_transferFlags[self::AMOUNT_DISCOUNT])) {
             $sum -= $this->getDiscount();
-            // PayPal requires to have discount less than items subtotal
             $this->_areAmountsValid = round($this->getDiscount(), 4) < round($itemsSubtotal, 4);
         } else {
             $this->_areAmountsValid = $itemsSubtotal > 0.00001;
@@ -100,12 +116,12 @@ class Cart extends \Magento\Payment\Model\Cart
 
         if (!$areItemsValid) {
             $this->_salesModelItems = [];
-            $this->_customItems = [];
+            $this->_customItems     = [];
         }
     }
 
     /**
-     * Import items from sales model with workarounds for PayFast
+     * Import items from sales model with workarounds for Payfast
      *
      * @return void
      */
@@ -119,23 +135,22 @@ class Cart extends \Magento\Payment\Model\Cart
             }
 
             $amount = $item->getPrice();
-            $qty = $item->getQty();
+            $qty    = $item->getQty();
 
             $subAggregatedLabel = '';
 
-            // workaround in case if item subtotal precision is not compatible with PayPal (.2)
             if ($amount - round($amount, 2)) {
-                $amount = $amount * $qty;
+                $amount             = $amount * $qty;
                 $subAggregatedLabel = ' x' . $qty;
-                $qty = 1;
+                $qty                = 1;
             }
 
             // aggregate item price if item qty * price does not match row total
             $itemBaseRowTotal = $item->getOriginalItem()->getBaseRowTotal();
             if ($amount * $qty != $itemBaseRowTotal) {
-                $amount = (double)$itemBaseRowTotal;
+                $amount             = (double)$itemBaseRowTotal;
                 $subAggregatedLabel = ' x' . $qty;
-                $qty = 1;
+                $qty                = 1;
             }
 
             $this->_salesModelItems[] = $this->_createItemFromData(
@@ -168,9 +183,9 @@ class Cart extends \Magento\Payment\Model\Cart
      * - Apply Customer Tax = After Discount
      * - Create a cart price rule with % discount applied to the Shipping Amount
      * - run shopping cart and estimate shipping
-     * - go to PayPal
      *
-     * @param  \Magento\Payment\Model\Cart\SalesModel\SalesModelInterface $salesEntity
+     * @param \Magento\Payment\Model\Cart\SalesModel\SalesModelInterface $salesEntity
+     *
      * @return void
      */
     protected function _applyDiscountTaxCompensationWorkaround(
@@ -179,20 +194,5 @@ class Cart extends \Magento\Payment\Model\Cart
         $dataContainer = $salesEntity->getTaxContainer();
         $this->addTax((double)$dataContainer->getBaseDiscountTaxCompensationAmount());
         $this->addTax((double)$dataContainer->getBaseShippingDiscountTaxCompensationAmnt());
-    }
-
-    /**
-     * Check whether any item has negative amount
-     *
-     * @return bool
-     */
-    public function hasNegativeItemAmount()
-    {
-        foreach ($this->_customItems as $item) {
-            if ($item->getAmount() < 0) {
-                return true;
-            }
-        }
-        return false;
     }
 }
