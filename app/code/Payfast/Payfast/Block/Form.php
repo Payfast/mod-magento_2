@@ -1,9 +1,10 @@
 <?php
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
+
 namespace Payfast\Payfast\Block;
 
 use Magento\Customer\Helper\Session\CurrentCustomer;
@@ -51,12 +52,12 @@ class Form extends \Magento\Payment\Block\Form
     protected $currentCustomer;
 
     /**
-     * @param Context                              $context
+     * @param Context $context
      * @param \Payfast\Payfast\Model\ConfigFactory $payfastConfigFactory
-     * @param ResolverInterface                    $localeResolver
-     * @param Data         $payfastData
-     * @param CurrentCustomer                      $currentCustomer
-     * @param array                                $data
+     * @param ResolverInterface $localeResolver
+     * @param Data $payfastData
+     * @param CurrentCustomer $currentCustomer
+     * @param array $data
      */
     public function __construct(
         Context $context,
@@ -66,8 +67,8 @@ class Form extends \Magento\Payment\Block\Form
         CurrentCustomer $currentCustomer,
         array $data = []
     ) {
-        $pre = __METHOD__ . " : ";
-        $this->_payfastData = $payfastData;
+        $pre                        = __METHOD__ . " : ";
+        $this->_payfastData         = $payfastData;
         $this->payfastConfigFactory = $payfastConfigFactory;
         parent::__construct($context, $data);
         $this->_logger->debug($pre . 'bof');
@@ -76,18 +77,6 @@ class Form extends \Magento\Payment\Block\Form
         $this->_isScopePrivate = true;
         $this->currentCustomer = $currentCustomer;
         $this->_logger->debug($pre . "eof");
-    }
-
-    /**
-     * Set template and redirect message
-     *
-     * @return void
-     */
-    protected function _construct()
-    {
-        $pre = __METHOD__ . " : ";
-        $this->_logger->debug($pre . 'bof');
-        $this->_config = $this->payfastConfigFactory->create()->setMethod($this->getMethodCode());
     }
 
     /**
@@ -101,5 +90,17 @@ class Form extends \Magento\Payment\Block\Form
         $this->_logger->debug($pre . 'bof');
 
         return $this->_methodCode;
+    }
+
+    /**
+     * Set template and redirect message
+     *
+     * @return void
+     */
+    protected function _construct()
+    {
+        $pre = __METHOD__ . " : ";
+        $this->_logger->debug($pre . 'bof');
+        $this->_config = $this->payfastConfigFactory->create()->setMethod($this->getMethodCode());
     }
 }

@@ -1,8 +1,9 @@
-<?php namespace Payfast\Payfast\Gateway\Validator;
+<?php
+namespace Payfast\Payfast\Gateway\Validator;
 
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
 
@@ -22,7 +23,7 @@ class ResponseCodeValidator extends AbstractValidator
     private $logger;
 
     /**
-     * @param LoggerInterface        $logger
+     * @param LoggerInterface $logger
      * @param ResultInterfaceFactory $resultFactory
      */
     public function __construct(ResultInterfaceFactory $resultFactory, LoggerInterface $logger)
@@ -55,23 +56,24 @@ class ResponseCodeValidator extends AbstractValidator
         if ($this->isSuccessfulTransaction($response)) {
             return $this->createResult(
                 true,
-                [__('Gateway will now call PayFast via redirect method.')]
+                [__('Gateway will now call Payfast via redirect method.')]
             );
         } else {
             return $this->createResult(
                 false,
-                [__('Gateway is not called just yet, we will now call PayFast via redirect.')]
+                [__('Gateway is not called just yet, we will now call Payfast via redirect.')]
             );
         }
     }
 
     /**
-     * @param  array $response
+     * @param array $response
+     *
      * @return bool
      */
     private function isSuccessfulTransaction(array $response)
     {
         return isset($response[self::RESULT_CODE])
-            && $response[self::RESULT_CODE] !== ClientMock::FAILURE;
+               && $response[self::RESULT_CODE] !== ClientMock::FAILURE;
     }
 }

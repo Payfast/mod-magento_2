@@ -1,8 +1,9 @@
-<?php namespace Payfast\Payfast\Gateway\Http\Client;
+<?php
+namespace Payfast\Payfast\Gateway\Http\Client;
 
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
 
@@ -31,7 +32,6 @@ class ClientMock implements ClientInterface
 
     public function placeRequest(TransferInterface $transferObject)
     {
-
         // TODO: Implement placeRequest() method.
         $response = $this->generateResponseForCode(
             $this->getResultCode(
@@ -41,31 +41,13 @@ class ClientMock implements ClientInterface
 
         $this->logger->debug(
             [
-                'method' => __METHOD__,
-                'request' => $transferObject->getBody(),
+                'method'   => __METHOD__,
+                'request'  => $transferObject->getBody(),
                 'response' => $response
             ]
         );
 
         return $response;
-    }
-
-    /**
-     * Returns result code
-     * will always return false for now since PayFast needs to do a redirect.
-     *
-     * @param  TransferInterface $transfer
-     * @return int
-     */
-    private function getResultCode(TransferInterface $transfer)
-    {
-        $headers = $transfer->getHeaders();
-
-        if (isset($headers['force_result'])) {
-            return (int)$headers['force_result'];
-        }
-
-        return self::SUCCESS;
     }
 
     /**
@@ -80,7 +62,7 @@ class ClientMock implements ClientInterface
         return array_merge(
             [
                 'RESULT_CODE' => $resultCode,
-                'TXN_ID' => $this->generateTxnId()
+                'TXN_ID'      => $this->generateTxnId()
             ],
             $this->getFieldsBasedOnResponseType($resultCode)
         );
@@ -95,16 +77,36 @@ class ClientMock implements ClientInterface
     }
 
     /**
+     * Returns result code
+     * will always return false for now since Payfast needs to do a redirect.
+     *
+     * @param TransferInterface $transfer
+     *
+     * @return int
+     */
+    private function getResultCode(TransferInterface $transfer)
+    {
+        $headers = $transfer->getHeaders();
+
+        if (isset($headers['force_result'])) {
+            return (int)$headers['force_result'];
+        }
+
+        return self::SUCCESS;
+    }
+
+    /**
      * Returns response fields for result code
      *
-     * @param  int $resultCode
+     * @param int $resultCode
+     *
      * @return array
      */
     private function getFieldsBasedOnResponseType($resultCode)
     {
         switch ($resultCode) {
-        case self::FAILURE:
-            return [
+            case self::FAILURE:
+                return [
                     'FRAUD_MSG_LIST' => [
                         'Stolen card',
                         'Customer location differs'

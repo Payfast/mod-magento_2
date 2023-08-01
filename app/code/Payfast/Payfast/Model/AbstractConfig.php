@@ -1,9 +1,10 @@
 <?php
 /**
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Copyright (c) 2023 Payfast (Pty) Ltd
+ * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
+
 namespace Payfast\Payfast\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -17,7 +18,7 @@ use Magento\Store\Model\ScopeInterface;
 abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config implements ConfigInterface
 {
     /**
-* #@+
+     * #@+
      * Payment actions
      */
     const PAYMENT_ACTION_SALE = 'Sale';
@@ -35,32 +36,32 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
     /**
      * #@-
      */
-
-    /**
-     * Current payment method code
-     *
-     * @var string
-     */
-    protected $_methodCode;
-
-    /**
-     * Current store id
-     *
-     * @var int
-     */
-    protected $_storeId;
-
-    /**
-     * @var string
-     */
-    protected $pathPattern;
-
     /**
      * Core store config
      *
      * @var ScopeConfigInterface
      */
     public $_scopeConfig;
+    /**
+     * Current payment method code
+     *
+     * @var string
+     */
+    protected $_methodCode;
+    /**
+     * Current store id
+     *
+     * @var int
+     */
+    protected $_storeId;
+    /**
+     * @var string
+     */
+    protected $pathPattern;
+    /**
+     * @var MethodInterface
+     */
+    protected $methodInstance;
 
     /**
      * @param ScopeConfigInterface $scopeConfig
@@ -73,17 +74,13 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
     }
 
     /**
-     * @var MethodInterface
-     */
-    protected $methodInstance;
-
-    /**
      * @return null|string
      */
     public function isActive()
     {
         return $this->getValue('active');
     }
+
     /**
      * Sets method instance used for retrieving method specific data
      *
@@ -144,7 +141,7 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
      * Returns payment configuration value
      *
      * @param string $key
-     * @param null   $storeId
+     * @param null $storeId
      *
      * @return null|string
      *
@@ -153,7 +150,7 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
     public function getValue($key, $storeId = null)
     {
         $underscored = strtolower(preg_replace('/(.)([A-Z])/', "$1_$2", $key));
-        $path = $this->_getSpecificConfigPath($underscored);
+        $path        = $this->_getSpecificConfigPath($underscored);
 
         if ($path !== null) {
             $value = $this->_scopeConfig->getValue(
@@ -194,35 +191,6 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
     }
 
     /**
-     * Map any supported payment method into a config path by specified field name
-     *
-     * @param string $fieldName
-     *
-     * @return string|null
-     */
-    protected function _getSpecificConfigPath($fieldName)
-    {
-        if ($this->pathPattern) {
-            return sprintf($this->pathPattern, $this->_methodCode, $fieldName);
-        }
-
-        return "payment/{$this->_methodCode}/{$fieldName}";
-    }
-
-    /**
-     * Perform additional config value preparation and return new value if needed
-     *
-     * @param string $key   Underscored key
-     * @param string $value Old value
-     *
-     * @return string Modified value or old value
-     */
-    protected function _prepareValue($key, $value)
-    {
-        return $value;
-    }
-
-    /**
      * Check whether method available for checkout or not
      *
      * @param null $methodCode
@@ -248,25 +216,25 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
     public function isMethodActive($method)
     {
         switch ($method) {
-        case Config::METHOD_CODE:
-            $isEnabled = $this->_scopeConfig->isSetFlag(
-                'payment/' . $this->getMethodCode() . '/active',
-                ScopeInterface::SCOPE_STORE,
-                $this->_storeId
-            ) ||
-                $this->_scopeConfig->isSetFlag(
-                    'payment/' . $this->getMethodCode() . '/active',
+            case Config::METHOD_CODE:
+                $isEnabled = $this->_scopeConfig->isSetFlag(
+                        'payment/' . $this->getMethodCode() . '/active',
+                        ScopeInterface::SCOPE_STORE,
+                        $this->_storeId
+                    ) ||
+                             $this->_scopeConfig->isSetFlag(
+                                 'payment/' . $this->getMethodCode() . '/active',
+                                 ScopeInterface::SCOPE_STORE,
+                                 $this->_storeId
+                             );
+                $method    = $this->getMethodCode();
+                break;
+            default:
+                $isEnabled = $this->_scopeConfig->isSetFlag(
+                    "payment/{$method}/active",
                     ScopeInterface::SCOPE_STORE,
                     $this->_storeId
                 );
-            $method = $this->getMethodCode();
-            break;
-        default:
-            $isEnabled = $this->_scopeConfig->isSetFlag(
-                "payment/{$method}/active",
-                ScopeInterface::SCOPE_STORE,
-                $this->_storeId
-            );
         }
 
         return $this->isMethodSupportedForCountry($method) && $isEnabled;
@@ -285,5 +253,34 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
     public function isMethodSupportedForCountry($method = null, $countryCode = null)
     {
         return true;
+    }
+
+    /**
+     * Map any supported payment method into a config path by specified field name
+     *
+     * @param string $fieldName
+     *
+     * @return string|null
+     */
+    protected function _getSpecificConfigPath($fieldName)
+    {
+        if ($this->pathPattern) {
+            return sprintf($this->pathPattern, $this->_methodCode, $fieldName);
+        }
+
+        return "payment/{$this->_methodCode}/{$fieldName}";
+    }
+
+    /**
+     * Perform additional config value preparation and return new value if needed
+     *
+     * @param string $key Underscored key
+     * @param string $value Old value
+     *
+     * @return string Modified value or old value
+     */
+    protected function _prepareValue($key, $value)
+    {
+        return $value;
     }
 }

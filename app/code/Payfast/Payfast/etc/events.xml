@@ -6,8 +6,10 @@
  */
 -->
 
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     <event name="sales_order_save_before">
-        <observer name="payfast_sales_order_save_before" instance="Payfast\Payfast\Observer\SalesOrderBeforeSaveObserver" />
+        <observer name="payfast_sales_order_save_before"
+                  instance="Payfast\Payfast\Observer\SalesOrderBeforeSaveObserver"/>
     </event>
 </config>
