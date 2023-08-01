@@ -68,16 +68,6 @@
                 <field id="instructions" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Instructions</label>
                 </field>
-                <field id="successful_order_status" translate="label" type="select" sortOrder="45" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Successful Order Status</label>
-                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
-                </field>
-                <field id="successful_order_state" translate="label" type="select" sortOrder="45" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Successful Order State</label>
-                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
-                </field>
                 <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Sort Order</label>
                     <frontend_class>validate-number</frontend_class>

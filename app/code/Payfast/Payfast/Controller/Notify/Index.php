@@ -3,11 +3,8 @@ namespace Payfast\Payfast\Controller\Notify;
 
 /**
  * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website
- * in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason,
- * you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or
- * part thereof in any way.
+ * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
 
 
@@ -33,7 +30,6 @@ class Index extends AbstractPayfast implements CsrfAwareActionInterface, HttpPos
      */
     public function execute(): ResultInterface
     {
-        $this->_logger->debug('Notify: ' . json_encode($_POST));
         $pre = __METHOD__ . " : ";
         $this->_logger->debug($pre . 'bof');
 
@@ -56,11 +52,6 @@ class Index extends AbstractPayfast implements CsrfAwareActionInterface, HttpPos
             flush();
         }
 
-        $passPhrase = $this->_config->getValue('passphrase');
-        if (empty($passPhrase)) {
-            $passPhrase = null;
-        }
-
         //// Get data sent by PayFast
         if (!$pfError) {
             // Posted variables from ITN
@@ -80,7 +71,8 @@ class Index extends AbstractPayfast implements CsrfAwareActionInterface, HttpPos
             if (!pfValidSignature(
                 $pfData,
                 $pfParamString,
-                $passPhrase
+                $this->getConfigData('passphrase'),
+                $this->getConfigData('server')
             )) {
                 $pfError = true;
                 $pfErrMsg = PF_ERR_INVALID_SIGNATURE;
@@ -110,7 +102,7 @@ class Index extends AbstractPayfast implements CsrfAwareActionInterface, HttpPos
 
             // Check order is in "pending payment" state
             if ($this->_order->getState() !== Order::STATE_PENDING_PAYMENT) {
-//                $pfError = true;
+                $pfError = true;
                 $pfErrMsg = PF_ERR_ORDER_PROCESSED;
             }
         }
@@ -130,7 +122,7 @@ class Index extends AbstractPayfast implements CsrfAwareActionInterface, HttpPos
             pflog('Check status and update order');
 
             // Successful
-            if ($pfData[Info::PAYMENT_STATUS] === "COMPLETE") {
+            if ($pfData[Info::PAYMENT_STATUS] == "COMPLETE") {
                 $this->setPaymentAdditionalInformation($pfData);
                 // Save invoice
                 $this->saveInvoice();
@@ -169,18 +161,7 @@ class Index extends AbstractPayfast implements CsrfAwareActionInterface, HttpPos
 
             /** @var \Magento\Sales\Model\Order $order */
             $order = $invoice->getOrder();
-            $status = $this->getConfigData('successful_order_status');
-            $state = $this->getConfigData('successful_order_state');
-            if (!$status || $status === '') {
-                $status = Order::STATE_PROCESSING;
-            }
-            if (!$state || $state === '') {
-                $state = Order::STATE_PROCESSING;
-            }
             $order->setIsInProcess(true);
-            $order->setState($state);
-            $order->setStatus($status);
-            $order->save();
             $transaction = $this->transactionFactory->create();
             $transaction->addObject($order)->save();
 
