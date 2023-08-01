@@ -98,16 +98,16 @@ class AuthorizationRequest implements BuilderInterface
             $pfOutput = '';
             // Create output string
             foreach ($data as $key => $val) {
-                if (!empty($val) && $key !== 'currency') {
+                if (!empty($val)) {
                     $pfOutput .= $key . '=' . urlencode($val) . '&';
                 }
             }
 
-            $passPhrase = $this->config->getValue('passphrase', $order->getStoreId()) ?? '';
-            if (!empty($passPhrase)) {
-                $pfOutput .= 'passphrase=' . urlencode($passPhrase);
-            } else {
-                $pfOutput = rtrim($pfOutput, '&');
+            $passPhrase = $this->config->getValue('passphrase', $order->getStoreId());
+            $pfOutput = substr($pfOutput, 0, -1);
+
+            if (!empty($passPhrase) && $this->config->getValue('server', $order->getStoreId()) !== 'test') {
+                $pfOutput = $pfOutput . "&passphrase=" . urlencode($passPhrase);
             }
 
             $this->logger->debug($pre . 'pfOutput for signature is : ' . $pfOutput);

@@ -124,7 +124,7 @@
     </type>
 
     <!-- Cancel Command -->
-    <virtualType name="PayfastPayfastCancelGatewayCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+    <virtualType name="PayfastPayfastCancelGatewayCommand" type="BraintreeVoidCommand">
         <arguments>
             <argument name="handler" xsi:type="object">Payfast\Payfast\Gateway\Response\CancelDetailsHandler</argument>
             <argument name="validator" xsi:type="object">Payfast\Payfast\Gateway\Validator\CancelResponseValidator</argument>
