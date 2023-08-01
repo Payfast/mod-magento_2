@@ -7,6 +7,24 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- defined in config.xml as a payment_method -->
+    <virtualType name="PayfastFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">Payfast\Payfast\Model\Config::METHOD_CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Payfast\Payfast\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Payfast\Payfast\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">Payfast\Payfast\Model\PayfastValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">PayfastPayfastGatewayCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="PayfastPayfastConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Payfast\Payfast\Model\Config::METHOD_CODE</argument>
+        </arguments>
+    </virtualType>
+
     <type name="\Payfast\Payfast\Helper\Data">
         <arguments>
             <argument name="methodCodes" xsi:type="array">
@@ -15,4 +33,135 @@
         </arguments>
     </type>
 
+    <virtualType name="Payfast\Payfast\Model\PayfastValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">PayfastPayfastConfigValueHandler</item>
+                <item name="can_capture" xsi:type="string">Payfast\Payfast\Gateway\Config\CanCaptureHandler</item>
+                <item name="can_authorize" xsi:type="string">Payfast\Payfast\Gateway\Config\CanAuthorizeHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PayfastPayfastConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">Payfast\Payfast\Model\Config</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PayfastPayfastGatewayCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="authorize" xsi:type="string">PayfastPayfastGatewayAuthorizeCommand</item>
+                <item name="capture" xsi:type="string">PayfastPayfastGatewayCaptureCommand</item>
+                <item name="void" xsi:type="string">PayfastPayfastVoidGatewayCommand</item>
+                <item name="cancel" xsi:type="string">PayfastPayfastCancelGatewayCommand</item>
+             </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorize command -->
+    <virtualType name="PayfastPayfastGatewayAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">PayfastPayfastGatewayAuthorizationRequest</argument>
+            <argument name="handler" xsi:type="object">PayfastPayfastGatewayResponseHandlerComposite</argument>
+            <argument name="transferFactory" xsi:type="object">Payfast\Payfast\Gateway\Http\TransferFactory</argument>
+            <argument name="client" xsi:type="object">Payfast\Payfast\Gateway\Http\Client\ClientMock</argument>
+            <argument name="validator" xsi:type="object">Payfast\Payfast\Gateway\Validator\ResponseCodeValidator</argument>
+        </arguments>
+    </virtualType>
+
+     <!-- Authorization Request -->
+    <virtualType name="PayfastPayfastGatewayAuthorizationRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="transaction" xsi:type="string">Payfast\Payfast\Gateway\Request\AuthorizationRequest</item>
+                <item name="mockData" xsi:type="string">Payfast\Payfast\Gateway\Request\MockDataRequest</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Payfast\Payfast\Gateway\Request\AuthorizationRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">PayfastPayfastConfig</argument>
+        </arguments>
+    </type>
+
+
+    <!-- Capture command -->
+    <virtualType name="PayfastPayfastGatewayCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">Payfast\Payfast\Gateway\Request\CaptureRequest</argument>
+            <argument name="handler" xsi:type="object">PayfastPayfastGatewayResponseHandlerComposite</argument>
+            <!--<argument name="handler" xsi:type="object">Payfast\Payfast\\Gateway\Response\ItnHandler</argument>-->
+            <argument name="transferFactory" xsi:type="object">Payfast\Payfast\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">Payfast\Payfast\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="client" xsi:type="object">Payfast\Payfast\Gateway\Http\Client\ClientMock</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Capture Request -->
+    <type name="Payfast\Payfast\Gateway\Request\CaptureRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">PayfastPayfastConfig</argument>
+        </arguments>
+    </type>
+    <!-- Void command -->
+    <virtualType name="PayfastPayfastVoidGatewayCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">Payfast\Payfast\Gateway\Request\VoidRequest</argument>
+            <argument name="handler" xsi:type="object">Payfast\Payfast\Gateway\Response\TxnIdHandler</argument>
+            <argument name="transferFactory" xsi:type="object">Payfast\Payfast\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">Payfast\Payfast\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="client" xsi:type="object">Payfast\Payfast\Gateway\Http\Client\ClientMock</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Void Request -->
+    <type name="Payfast\Payfast\Gateway\Request\VoidRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">PayfastPayfastConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Cancel Command -->
+    <virtualType name="PayfastPayfastCancelGatewayCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="handler" xsi:type="object">Payfast\Payfast\Gateway\Response\CancelDetailsHandler</argument>
+            <argument name="validator" xsi:type="object">Payfast\Payfast\Gateway\Validator\CancelResponseValidator</argument>
+        </arguments>
+    </virtualType>
+    <!-- END Cancel Command -->
+
+    <!-- Response handlers -->
+    <virtualType name="PayfastPayfastGatewayResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <!--this is is our TXNID and response will have it if successfully paid-->
+                <item name="txnid" xsi:type="string">Payfast\Payfast\Gateway\Response\ItnHandler</item>
+
+                <!--we don't need fraud handler let gateway manage fraud for us.-->
+                <!--<item name="fraud" xsi:type="string">Payfast\Payfast\Gateway\Response\FraudHandler</item>-->
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    <virtualType name="PayfastPayfastValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">PayfastPayfastConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="PayfastPayfastConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">PayfastPayfastConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Payfast\Payfast\Block\Payment\Info">
+        <arguments>
+            <argument name="config" xsi:type="object">PayfastPayfastConfig</argument>
+        </arguments>
+    </type>
 </config>

@@ -6,16 +6,18 @@
  */
 namespace Payfast\Payfast\Model;
 
-use Magento\Payment\Model\Method\ConfigInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Model\MethodInterface;
 use Magento\Store\Model\ScopeInterface;
 
 /**
  * Class AbstractConfig
  */
-abstract class AbstractConfig implements ConfigInterface
+abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config implements ConfigInterface
 {
-    /**#@+
+    /**
+* #@+
      * Payment actions
      */
     const PAYMENT_ACTION_SALE = 'Sale';
@@ -23,8 +25,16 @@ abstract class AbstractConfig implements ConfigInterface
     const PAYMENT_ACTION_AUTH = 'Authorization';
 
     const PAYMENT_ACTION_ORDER = 'Order';
-    /**#@-*/
 
+    const ACTION_ORDER = 'order';
+
+    const ACTION_AUTHORIZE = 'authorize';
+
+    const ACTION_AUTHORIZE_CAPTURE = 'authorize_capture';
+
+    /**
+     * #@-
+     */
 
     /**
      * Current payment method code
@@ -45,21 +55,20 @@ abstract class AbstractConfig implements ConfigInterface
      */
     protected $pathPattern;
 
-
     /**
      * Core store config
      *
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var ScopeConfigInterface
      */
     public $_scopeConfig;
 
     /**
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-    )
-    {
+        ScopeConfigInterface $scopeConfig
+    ) {
+        parent::__construct($scopeConfig, self::getMethodCode());
         $this->_scopeConfig = $scopeConfig;
     }
 
@@ -69,13 +78,20 @@ abstract class AbstractConfig implements ConfigInterface
     protected $methodInstance;
 
     /**
+     * @return null|string
+     */
+    public function isActive()
+    {
+        return $this->getValue('active');
+    }
+    /**
      * Sets method instance used for retrieving method specific data
      *
      * @param MethodInterface $method
      *
      * @return $this
      */
-    public function setMethodInstance( $method )
+    public function setMethodInstance($method)
     {
         $this->methodInstance = $method;
 
@@ -89,14 +105,11 @@ abstract class AbstractConfig implements ConfigInterface
      *
      * @return $this
      */
-    public function setMethod( $method )
+    public function setMethod($method)
     {
-        if ( $method instanceof MethodInterface )
-        {
+        if ($method instanceof MethodInterface) {
             $this->_methodCode = $method->getCode();
-        }
-        elseif ( is_string( $method ) )
-        {
+        } elseif (is_string($method)) {
             $this->_methodCode = $method;
         }
 
@@ -120,7 +133,7 @@ abstract class AbstractConfig implements ConfigInterface
      *
      * @return $this
      */
-    public function setStoreId( $storeId )
+    public function setStoreId($storeId)
     {
         $this->_storeId = (int)$storeId;
 
@@ -131,26 +144,24 @@ abstract class AbstractConfig implements ConfigInterface
      * Returns payment configuration value
      *
      * @param string $key
-     * @param null $storeId
+     * @param null   $storeId
      *
      * @return null|string
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function getValue( $key, $storeId = null )
+    public function getValue($key, $storeId = null)
     {
+        $underscored = strtolower(preg_replace('/(.)([A-Z])/', "$1_$2", $key));
+        $path = $this->_getSpecificConfigPath($underscored);
 
-        $underscored = strtolower( preg_replace( '/(.)([A-Z])/', "$1_$2", $key ) );
-        $path = $this->_getSpecificConfigPath( $underscored );
-
-        if ( $path !== null )
-        {
+        if ($path !== null) {
             $value = $this->_scopeConfig->getValue(
                 $path,
                 ScopeInterface::SCOPE_STORE,
                 $this->_storeId
             );
-            $value = $this->_prepareValue( $underscored, $value );
+            $value = $this->_prepareValue($underscored, $value);
 
             return $value;
         }
@@ -165,7 +176,7 @@ abstract class AbstractConfig implements ConfigInterface
      *
      * @return void
      */
-    public function setMethodCode( $methodCode )
+    public function setMethodCode($methodCode)
     {
         $this->_methodCode = $methodCode;
     }
@@ -177,7 +188,7 @@ abstract class AbstractConfig implements ConfigInterface
      *
      * @return void
      */
-    public function setPathPattern( $pathPattern )
+    public function setPathPattern($pathPattern)
     {
         $this->pathPattern = $pathPattern;
     }
@@ -189,11 +200,10 @@ abstract class AbstractConfig implements ConfigInterface
      *
      * @return string|null
      */
-    protected function _getSpecificConfigPath( $fieldName )
+    protected function _getSpecificConfigPath($fieldName)
     {
-        if ( $this->pathPattern )
-        {
-            return sprintf( $this->pathPattern, $this->_methodCode, $fieldName );
+        if ($this->pathPattern) {
+            return sprintf($this->pathPattern, $this->_methodCode, $fieldName);
         }
 
         return "payment/{$this->_methodCode}/{$fieldName}";
@@ -207,7 +217,7 @@ abstract class AbstractConfig implements ConfigInterface
      *
      * @return string Modified value or old value
      */
-    protected function _prepareValue( $key, $value )
+    protected function _prepareValue($key, $value)
     {
         return $value;
     }
@@ -219,11 +229,11 @@ abstract class AbstractConfig implements ConfigInterface
      *
      * @return bool
      */
-    public function isMethodAvailable( $methodCode = null )
+    public function isMethodAvailable($methodCode = null)
     {
         $methodCode = $methodCode ?: $this->_methodCode;
 
-        return $this->isMethodActive( $methodCode );
+        return $this->isMethodActive($methodCode);
     }
 
     /**
@@ -235,31 +245,31 @@ abstract class AbstractConfig implements ConfigInterface
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public function isMethodActive( $method )
+    public function isMethodActive($method)
     {
-        switch ( $method )
-        {
-            case Config::METHOD_CODE:
-                $isEnabled = $this->_scopeConfig->isSetFlag(
-                        'payment/' . Config::METHOD_CODE . '/active',
-                        ScopeInterface::SCOPE_STORE, $this->_storeId
-                    ) ||
-                    $this->_scopeConfig->isSetFlag(
-                        'payment/' . Config::METHOD_CODE . '/active',
-                        ScopeInterface::SCOPE_STORE,
-                        $this->_storeId
-                    );
-                $method = Config::METHOD_CODE;
-                break;
-            default:
-                $isEnabled = $this->_scopeConfig->isSetFlag(
-                    "payment/{$method}/active",
+        switch ($method) {
+        case Config::METHOD_CODE:
+            $isEnabled = $this->_scopeConfig->isSetFlag(
+                'payment/' . $this->getMethodCode() . '/active',
+                ScopeInterface::SCOPE_STORE,
+                $this->_storeId
+            ) ||
+                $this->_scopeConfig->isSetFlag(
+                    'payment/' . $this->getMethodCode() . '/active',
                     ScopeInterface::SCOPE_STORE,
                     $this->_storeId
                 );
+            $method = $this->getMethodCode();
+            break;
+        default:
+            $isEnabled = $this->_scopeConfig->isSetFlag(
+                "payment/{$method}/active",
+                ScopeInterface::SCOPE_STORE,
+                $this->_storeId
+            );
         }
 
-        return $this->isMethodSupportedForCountry( $method ) && $isEnabled;
+        return $this->isMethodSupportedForCountry($method) && $isEnabled;
     }
 
     /**
@@ -272,9 +282,8 @@ abstract class AbstractConfig implements ConfigInterface
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function isMethodSupportedForCountry( $method = null, $countryCode = null )
+    public function isMethodSupportedForCountry($method = null, $countryCode = null)
     {
         return true;
     }
-
 }

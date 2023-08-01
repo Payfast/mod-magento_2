@@ -6,10 +6,19 @@
  */
 namespace Payfast\Payfast\Helper;
 
+use Magento\Framework\App\Config\BaseFactory;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Quote\Model\Quote;
+use Magento\Store\Model\Store;
+use Payfast\Payfast\Model\ConfigFactory;
+use Psr\Log\LoggerInterface;
+use \Magento\Payment\Helper\Data as helperData;
+
 /**
  * PayFast Data helper
  */
-class Data extends \Magento\Framework\App\Helper\AbstractHelper
+class Data extends AbstractHelper
 {
 
     /**
@@ -20,7 +29,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected static $_shouldAskToCreateBillingAgreement = false;
 
     /**
-     * @var \Magento\Payment\Helper\Data
+     * @var helperData
      */
     protected $_paymentData;
 
@@ -30,38 +39,34 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private $methodCodes;
 
     /**
-     * @var \Payfast\Payfast\Model\ConfigFactory
+     * @var ConfigFactory
      */
     private $configFactory;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     protected $_logger;
+
     /**
-     * @param \Magento\Framework\App\Helper\Context $context
-     * @param \Magento\Payment\Helper\Data $paymentData
-     * @param \Magento\Framework\App\Config\BaseFactory $configFactory
-     * @param array $methodCodes
+     * @param Context     $context
+     * @param helperData  $paymentData
+     * @param BaseFactory $configFactory
+     * @param array       $methodCodes
      */
-    public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Payment\Helper\Data $paymentData,
-        \Magento\Framework\App\Config\BaseFactory $configFactory,
-        array $methodCodes
-    )
+    public function __construct(Context $context, helperData $paymentData, BaseFactory $configFactory, array $methodCodes)
     {
         $this->_logger = $context->getLogger();
 
         $pre = __METHOD__ . " : ";
-        $this->_logger->debug( $pre . 'bof, methodCodes is : ', $methodCodes );
+        $this->_logger->debug($pre . 'bof, methodCodes is : ', $methodCodes);
 
         $this->_paymentData = $paymentData;
         $this->methodCodes = $methodCodes;
         $this->configFactory = $configFactory;
 
-        parent::__construct( $context );
-        $this->_logger->debug( $pre . 'eof' );
+        parent::__construct($context);
+        $this->_logger->debug($pre . 'eof');
     }
 
     /**
@@ -73,8 +78,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function shouldAskToCreateBillingAgreement()
     {
         $pre = __METHOD__ . " : ";
-        $this->_logger->debug( $pre . "bof" );
-        $this->_logger->debug( $pre . "eof" );
+        $this->_logger->debug($pre . "bof");
+        $this->_logger->debug($pre . "eof");
 
         return self::$_shouldAskToCreateBillingAgreement;
     }
@@ -82,27 +87,25 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * Retrieve available billing agreement methods
      *
-     * @param null|string|bool|int|\Magento\Store\Model\Store $store
-     * @param \Magento\Quote\Model\Quote|null $quote
+     * @param null|string|bool|int|Store $store
+     * @param Quote|null                 $quote
      *
      * @return MethodInterface[]
      */
-    public function getBillingAgreementMethods( $store = null, $quote = null )
+    public function getBillingAgreementMethods($store = null, $quote = null)
     {
         $pre = __METHOD__ . " : ";
-        $this->_logger->debug( $pre . 'bof' );
+        $this->_logger->debug($pre . 'bof');
         $result = [ ];
-        foreach ( $this->_paymentData->getStoreMethods( $store, $quote ) as $method )
-        {
-            if ( $method instanceof MethodInterface )
-            {
+
+//        foreach ($this->_paymentData->getStoreMethods($store, $quote) as $method) {
+        foreach ($this->_paymentData->getPaymentMethodList() as $method) {
+            if ($method instanceof MethodInterface) {
                 $result[] = $method;
             }
         }
-        $this->_logger->debug( $pre . 'eof | result : ', $result );
+        $this->_logger->debug($pre . 'eof | result : ', $result);
 
         return $result;
     }
-
-
 }

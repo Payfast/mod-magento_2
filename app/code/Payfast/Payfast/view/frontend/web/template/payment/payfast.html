@@ -16,6 +16,9 @@ Except as expressly indicated in this licence, you may not use, copy, modify or 
         </label>
     </div>
     <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
         <div class="payment-method-billing-address">
             <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
             <!-- ko template: getTemplate() --><!-- /ko -->

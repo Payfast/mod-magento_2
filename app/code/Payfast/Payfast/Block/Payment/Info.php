@@ -6,6 +6,9 @@
  */
 namespace Payfast\Payfast\Block\Payment;
 
+use Magento\Framework\View\Element\Template\Context;
+use Payfast\Payfast\Model\InfoFactory;
+
 /**
  * PayFast common payment info block
  * Uses default templates
@@ -13,20 +16,18 @@ namespace Payfast\Payfast\Block\Payment;
 class Info extends \Magento\Payment\Block\Info
 {
     /**
-     * @var \Payfast\Payfast\Model\InfoFactory
+     * @var InfoFactory
      */
     protected $_payfastInfoFactory;
 
     /**
-     * @param \Magento\Framework\View\Element\Template\Context $context
-     * @param \Magento\Payment\Model\Config $paymentConfig
-     * @param \Payfast\Payfast\Model\InfoFactory $payfastInfoFactory
-     * @param array $data
+     * @param Context     $context
+     * @param InfoFactory $payfastInfoFactory
+     * @param array       $data
      */
     public function __construct(
-        \Magento\Framework\View\Element\Template\Context $context,
-        \Magento\Payment\Model\Config $paymentConfig,
-        \Payfast\Payfast\Model\InfoFactory $payfastInfoFactory,
+        Context $context,
+        InfoFactory $payfastInfoFactory,
         array $data = []
     ) {
         $this->_payfastInfoFactory = $payfastInfoFactory;

@@ -4,64 +4,78 @@
  * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
  * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
-namespace Payfast\Payfast\Block\Payfast;
+namespace Payfast\Payfast\Block;
 
 use Magento\Customer\Helper\Session\CurrentCustomer;
 use Magento\Framework\Locale\ResolverInterface;
-use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
+use Payfast\Payfast\Helper\Data;
 use Payfast\Payfast\Model\Config;
-use Payfast\Payfast\Model\Payfast\Checkout;
+use Payfast\Payfast\Model\PayfastConfigProvider;
 
 class Form extends \Magento\Payment\Block\Form
 {
-    /** @var string Payment method code */
+    /**
+     * @var string Payment method code
+     */
     protected $_methodCode = Config::METHOD_CODE;
 
-    /** @var \Payfast\Payfast\Helper\Data */
+    /**
+     * @var Data
+     */
     protected $_payfastData;
 
-    /** @var \Payfast\Payfast\Model\ConfigFactory */
+    /**
+     * @var \Payfast\Payfast\Model\ConfigFactory
+     */
     protected $payfastConfigFactory;
 
-    /** @var ResolverInterface */
+    /**
+     * @var ResolverInterface
+     */
     protected $_localeResolver;
 
-    /** @var \Payfast\Payfast\Model\Config */
+    /**
+     * @var \Payfast\Payfast\Model\Config
+     */
     protected $_config;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     protected $_isScopePrivate;
 
-    /** @var CurrentCustomer */
+    /**
+     * @var CurrentCustomer
+     */
     protected $currentCustomer;
 
     /**
-     * @param Context $context
+     * @param Context                              $context
      * @param \Payfast\Payfast\Model\ConfigFactory $payfastConfigFactory
-     * @param ResolverInterface $localeResolver
-     * @param \Payfast\Payfast\Helper\Data $payfastData
-     * @param CurrentCustomer $currentCustomer
-     * @param array $data
+     * @param ResolverInterface                    $localeResolver
+     * @param Data         $payfastData
+     * @param CurrentCustomer                      $currentCustomer
+     * @param array                                $data
      */
     public function __construct(
         Context $context,
-        \Payfast\Payfast\Model\ConfigFactory $payfastConfigFactory,
+        PayfastConfigProvider $payfastConfigFactory,
         ResolverInterface $localeResolver,
-        \Payfast\Payfast\Helper\Data $payfastData,
+        Data $payfastData,
         CurrentCustomer $currentCustomer,
         array $data = []
     ) {
         $pre = __METHOD__ . " : ";
-        $this->_logger->debug( $pre . 'bof' );
         $this->_payfastData = $payfastData;
         $this->payfastConfigFactory = $payfastConfigFactory;
+        parent::__construct($context, $data);
+        $this->_logger->debug($pre . 'bof');
         $this->_localeResolver = $localeResolver;
-        $this->_config = null;
+
         $this->_isScopePrivate = true;
         $this->currentCustomer = $currentCustomer;
-        parent::__construct($context, $data);
-        $this->_logger->debug( $pre . "eof" );
+        $this->_logger->debug($pre . "eof");
     }
 
     /**
@@ -72,9 +86,8 @@ class Form extends \Magento\Payment\Block\Form
     protected function _construct()
     {
         $pre = __METHOD__ . " : ";
-        $this->_logger->debug( $pre . 'bof' );
-        $this->_config = $this->payfastConfigFactory->create()->setMethod( $this->getMethodCode() );
-        parent::_construct();
+        $this->_logger->debug($pre . 'bof');
+        $this->_config = $this->payfastConfigFactory->create()->setMethod($this->getMethodCode());
     }
 
     /**
@@ -85,12 +98,8 @@ class Form extends \Magento\Payment\Block\Form
     public function getMethodCode()
     {
         $pre = __METHOD__ . " : ";
-        $this->_logger->debug( $pre . 'bof' );
+        $this->_logger->debug($pre . 'bof');
 
         return $this->_methodCode;
     }
-
-
-
-
 }

@@ -1,8 +1,10 @@
 {
     "name": "payfast/payfast",
-    "description": "Payfast Module - Tested up to Magento v2.1.3",
+    "description": "Payfast Module - Tested up to Magento v2.4.5",
     "license": "proprietary",
     "homepage": "https://www.payfast.co.za",
+    "version": "2.0.7",
+    "minimum-stability": "dev",
     "authors":
     [
         {
@@ -13,5 +15,13 @@
     "support":
     {
         "email": "developers@payfast.co.za"
+    },
+    "autoload": {
+        "files": [
+          "registration.php"
+        ],
+        "psr-4": {
+          "Payfast\\Payfast\\": ""
+        }
     }
 }

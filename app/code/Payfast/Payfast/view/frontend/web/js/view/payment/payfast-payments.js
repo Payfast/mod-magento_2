@@ -9,7 +9,7 @@ define(
         'Magento_Checkout/js/model/payment/renderer-list'
     ],
     function (Component,
-              rendererList
+        rendererList
     ) {
         'use strict';
 
@@ -19,7 +19,9 @@ define(
                 component: 'Payfast_Payfast/js/view/payment/method-renderer/payfast-method'
             }
         );
-        /** Add view logic here if needed */
+        /**
+    * Add view logic here if needed 
+    */
         return Component.extend({});
     }
 );
