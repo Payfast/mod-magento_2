@@ -12,49 +12,60 @@ define(
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/checkout-data',
         'Magento_Checkout/js/model/payment/additional-validators',
-        'mage/url'
+        'mage/url',
+        'Magento_Checkout/js/model/quote',
+        'Magento_Ui/js/view/messages'
     ],
     function ($,
-              Component,
-              placeOrderAction,
-              selectPaymentMethodAction,
-              customer,
-              checkoutData,
-              additionalValidators,
-              url)  {
+        Component,
+        placeOrderAction,
+        selectPaymentMethodAction,
+        customer,
+        checkoutData,
+        additionalValidators,
+        url,
+        quote,
+    ) {
         'use strict';
 
-        return Component.extend({
-            defaults: {
-                template: 'Payfast_Payfast/payment/payfast'
-            },
-            redirectAfterPlaceOrder: false,
+        return Component.extend(
+            {
+                defaults: {
+                    template: 'Payfast_Payfast/payment/payfast'
+                },
+                redirectAfterPlaceOrder: false,
 
-            getCode: function() {
-                return 'payfast';
-            },
-            /**
-             * Get value of instruction field.
-             * @returns {String}
-             */
-            getInstructions: function () {
-                return window.checkoutConfig.payment.instructions[this.item.method];
-            },
-            isAvailable: function() {
-                return quote.totals().grand_total <= 0;
-            },
-            afterPlaceOrder: function () {
-                window.location.replace( url.build(window.checkoutConfig.payment.payfast.redirectUrl.payfast) );
-            },
-            /** Returns payment acceptance mark link path */
-            getPaymentAcceptanceMarkHref: function() {
-                return window.checkoutConfig.payment.payfast.paymentAcceptanceMarkHref;
-            },
-            /** Returns payment acceptance mark image path */
-            getPaymentAcceptanceMarkSrc: function() {
-                return window.checkoutConfig.payment.payfast.paymentAcceptanceMarkSrc;
+                getCode: function () {
+                    return 'payfast';
+                },
+                /**
+                 * Get value of instruction field.
+                 *
+                 * @returns {String}
+                 */
+                getInstructions: function () {
+                    return window.checkoutConfig.payment.instructions[this.item.method];
+                },
+                isAvailable: function () {
+                    return quote.totals().grand_total <= 0;
+                },
+
+                afterPlaceOrder: function () {
+                    window.location.replace(url.build(window.checkoutConfig.payment.payfast.redirectUrl.payfast));
+                },
+                /**
+                 * Returns payment acceptance mark link path 
+                 */
+                getPaymentAcceptanceMarkHref: function () {
+                    return window.checkoutConfig.payment.payfast.paymentAcceptanceMarkHref;
+                },
+                /**
+                 * Returns payment acceptance mark image path 
+                 */
+                getPaymentAcceptanceMarkSrc: function () {
+                    return window.checkoutConfig.payment.payfast.paymentAcceptanceMarkSrc;
+                },
             }
-
-        });
+        );
     }
 );

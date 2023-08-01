@@ -27,7 +27,8 @@ class Info
     const M_PAYMENT_ID = 'm_payment_id';
     const PF_PAYMENT_ID = 'pf_payment_id';
     const EMAIL_ADDRESS = 'email_address';
-
+    const MERCHANT_ID ='merchant_id';
+    const MERCHANT_KEY ='merchant_key';
     /**
      * Apply a filter upon value getting
      *
@@ -37,12 +38,11 @@ class Info
      * @return string
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    protected function _getValue( $value, $key )
+    protected function _getValue($value, $key)
     {
         $label = '';
-        $outputValue = implode( ', ', (array)$value );
+        $outputValue = implode(', ', (array)$value);
 
-        return sprintf( '#%s%s', $outputValue, $outputValue == $label ? '' : ': ' . $label );
+        return sprintf('#%s%s', $outputValue, $outputValue == $label ? '' : ': ' . $label);
     }
-
 }

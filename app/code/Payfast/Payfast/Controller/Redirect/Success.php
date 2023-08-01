@@ -6,7 +6,8 @@
  */
 namespace Payfast\Payfast\Controller\Redirect;
 
-
+use Magento\Framework\View\Result\PageFactory;
+use Payfast\Payfast\Controller\AbstractPayfast;
 
 /**
  * Responsible for loading page content.
@@ -14,9 +15,11 @@ namespace Payfast\Payfast\Controller\Redirect;
  * This is a basic controller that only loads the corresponding layout file. It may duplicate other such
  * controllers, and thus it is considered tech debt. This code duplication will be resolved in future releases.
  */
-class Success extends \Payfast\Payfast\Controller\AbstractPayfast
+class Success extends AbstractPayfast
 {
-    /** @var \Magento\Framework\View\Result\PageFactory */
+    /**
+     * @var PageFactory
+     */
     protected $resultPageFactory;
 
     /**
@@ -29,29 +32,19 @@ class Success extends \Payfast\Payfast\Controller\AbstractPayfast
         $pre = __METHOD__ . " : ";
         $this->_logger->debug($pre . 'bof');
 
-        try
-        {
+        try {
 
+            return $this->_redirect('checkout/onepage/success', $this->_request->getParams());
 
-            // ToDo update the order.
-            $this->_redirect('checkout/onepage/success');
-
-        }
-        catch ( \Magento\Framework\Exception\LocalizedException $e )
-        {
-            $this->_logger->error( $pre . $e->getMessage());
-
-            $this->messageManager->addExceptionMessage( $e, $e->getMessage() );
-            $this->_redirect( 'checkout/cart' );
-        }
-        catch ( \Exception $e )
-        {
-            $this->_logger->error( $pre . $e->getMessage());
-            $this->messageManager->addExceptionMessage( $e, __( 'We can\'t start PayFast Checkout.' ) );
-            $this->_redirect( 'checkout/cart' );
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            $this->_logger->error($pre . $e->getMessage());
+            $this->messageManager->addExceptionMessage($e, $e->getMessage());
+            return $this->_redirect('checkout/cart');
+        } catch (\Exception $e) {
+            $this->_logger->error($pre . $e->getMessage());
+            $this->messageManager->addExceptionMessage($e, __('We can\'t start PayFast Checkout.'));
+            return $this->_redirect('checkout/cart');
         }
 
-        return '';
     }
-
 }

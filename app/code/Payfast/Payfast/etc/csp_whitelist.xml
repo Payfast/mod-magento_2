@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="form-action">
+            <values>
+                <value id="pay-page-sandbox" type="host">https://sandbox.payfast.co.za</value>
+                <value id="pay-page-live" type="host">https://www.payfast.co.za/eng/process</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

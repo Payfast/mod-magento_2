@@ -24,7 +24,20 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Log request data to payfast.log, should be set to "No" when site is live</comment>
                 </field>
-                <field id="server" translate="label" type="text" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="0">
+
+                <field id="allowed_confirmation_email" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Send Order Confirmation email</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>when enabled this will send order confirmation email after successful payment</comment>
+                </field>
+
+                <field id="allowed_invoice_email" translate="label" type="select" sortOrder="22" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Send Invoice email</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>when enabled this will send invoice email after successful payment</comment>
+                </field>
+
+                <field id="server" translate="label" type="text" sortOrder="23" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>server</label>
                     <comment> test or live - enter "test" to test the integration with PayFast sandbox; enter "live" when ready to perfrom live transactions.</comment>
                 </field>
@@ -54,6 +67,16 @@
                 </field>
                 <field id="instructions" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Instructions</label>
+                </field>
+                <field id="successful_order_status" translate="label" type="select" sortOrder="45" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Successful Order Status</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
+                <field id="successful_order_state" translate="label" type="select" sortOrder="45" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Successful Order State</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
                 </field>
                 <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Sort Order</label>

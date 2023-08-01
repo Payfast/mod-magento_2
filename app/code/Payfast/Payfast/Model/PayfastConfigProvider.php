@@ -7,10 +7,13 @@
 namespace Payfast\Payfast\Model;
 
 use Magento\Checkout\Model\ConfigProviderInterface;
-use Magento\Framework\Locale\ResolverInterface;
 use Magento\Customer\Helper\Session\CurrentCustomer;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Locale\ResolverInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
+use Magento\Payment\Model\Method\AbstractMethod;
 use Payfast\Payfast\Helper\Data as PayfastHelper;
+use Psr\Log\LoggerInterface;
 
 class PayfastConfigProvider implements ConfigProviderInterface
 {
@@ -25,16 +28,18 @@ class PayfastConfigProvider implements ConfigProviderInterface
     protected $config;
 
     /**
-     * @var \Magento\Customer\Helper\Session\CurrentCustomer
+     * @var CurrentCustomer
      */
     protected $currentCustomer;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     protected $_logger;
 
-    /** @var PayfastHelper */
+    /**
+     * @var PayfastHelper 
+     */
     protected $payfastHelper;
 
     /**
@@ -45,7 +50,7 @@ class PayfastConfigProvider implements ConfigProviderInterface
     ];
 
     /**
-     * @var \Magento\Payment\Model\Method\AbstractMethod[]
+     * @var AbstractMethod[]
      */
     protected $methods = [];
 
@@ -55,14 +60,17 @@ class PayfastConfigProvider implements ConfigProviderInterface
     protected $paymentHelper;
 
     /**
-     * @param ConfigFactory $configFactory
+     * @param LoggerInterface   $logger
+     * @param ConfigFactory     $configFactory
      * @param ResolverInterface $localeResolver
-     * @param CurrentCustomer $currentCustomer
-     * @param PayfastHelper $paymentHelper
-     * @param PaymentHelper $paymentHelper
+     * @param CurrentCustomer   $currentCustomer
+     * @param PayfastHelper     $payfastHelper
+     * @param PaymentHelper     $paymentHelper
+     *
+     * @throws LocalizedException
      */
     public function __construct(
-        \Psr\Log\LoggerInterface $logger,
+        LoggerInterface $logger,
         ConfigFactory $configFactory,
         ResolverInterface $localeResolver,
         CurrentCustomer $currentCustomer,
@@ -83,7 +91,7 @@ class PayfastConfigProvider implements ConfigProviderInterface
             $this->methods[$code] = $this->paymentHelper->getMethodInstance($code);
         }
 
-        $this->_logger->debug( $pre . 'eof and this  methods has : ', $this->methods );
+        $this->_logger->debug($pre . 'eof and this  methods has : ', $this->methods);
     }
 
     /**
@@ -107,6 +115,7 @@ class PayfastConfigProvider implements ConfigProviderInterface
                 $config['payment']['payfast']['redirectUrl'][$code] = $this->getMethodRedirectUrl($code);
                 $config['payment']['payfast']['billingAgreementCode'][$code] = $this->getBillingAgreementCode($code);
 
+                $config['payment']['payfast']['isActive'][$code] = $this->config->isActive();
             }
         }
         $this->_logger->debug($pre . 'eof', $config);
@@ -116,15 +125,16 @@ class PayfastConfigProvider implements ConfigProviderInterface
     /**
      * Return redirect URL for method
      *
-     * @param string $code
+     * @param  string $code
      * @return mixed
      */
     protected function getMethodRedirectUrl($code)
     {
         $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
+        $this->_logger->debug("code is : {$code}");
 
-        $methodUrl = $this->methods[$code]->getCheckoutRedirectUrl();
+        $methodUrl = $this->config->getCheckoutRedirectUrl();
 
         $this->_logger->debug($pre . 'eof');
         return $methodUrl;
@@ -133,16 +143,16 @@ class PayfastConfigProvider implements ConfigProviderInterface
     /**
      * Return billing agreement code for method
      *
-     * @param string $code
+     * @param  string $code
      * @return null|string
      */
     protected function getBillingAgreementCode($code)
     {
-
         $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
 
         $customerId = $this->currentCustomer->getCustomerId();
+
         $this->config->setMethod($code);
 
         $this->_logger->debug($pre . 'eof');
