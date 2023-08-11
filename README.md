@@ -1,7 +1,7 @@
 # mod-magento_2
 
 Payfast Magento Module v2.4.1 for Magento 2.4.4+ on PHP 8.1
------------------------------------------------------------------------------
+
 Copyright (c) 2023 Payfast (Pty) Ltd
 You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in
 conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may
