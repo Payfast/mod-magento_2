@@ -1,10 +1,9 @@
 <?php
+
 namespace Payfast\Payfast\Gateway\Http\Client;
 
 /**
- * Copyright (c) 2023 Payfast (Pty) Ltd
- * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
+ * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
 use Magento\Payment\Gateway\Http\ClientInterface;
@@ -13,8 +12,8 @@ use Magento\Payment\Model\Method\Logger;
 
 class ClientMock implements ClientInterface
 {
-    const SUCCESS = 1;
-    const FAILURE = 0;
+    public const SUCCESS = 1;
+    public const FAILURE = 0;
 
     /**
      * @var Logger
@@ -22,6 +21,8 @@ class ClientMock implements ClientInterface
     private $logger;
 
     /**
+     * Constructor
+     *
      * @param Logger $logger
      */
     public function __construct(
@@ -30,6 +31,13 @@ class ClientMock implements ClientInterface
         $this->logger = $logger;
     }
 
+    /**
+     * Place request
+     *
+     * @param TransferInterface $transferObject
+     *
+     * @return Object
+     */
     public function placeRequest(TransferInterface $transferObject)
     {
         // TODO: Implement placeRequest() method.
@@ -53,7 +61,7 @@ class ClientMock implements ClientInterface
     /**
      * Generates response
      *
-     * @param $resultCode
+     * @param string $resultCode
      *
      * @return array
      */
@@ -69,16 +77,19 @@ class ClientMock implements ClientInterface
     }
 
     /**
+     * Generate the txn id
+     *
      * @return string
      */
     protected function generateTxnId()
     {
+        //@codingStandardsIgnoreStart
         return md5(mt_rand(0, 1000));
+        //@codingStandardsIgnoreEnd
     }
 
     /**
-     * Returns result code
-     * will always return false for now since Payfast needs to do a redirect.
+     * Returns result code will always return false for now since Payfast needs to do a redirect.
      *
      * @param TransferInterface $transfer
      *

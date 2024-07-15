@@ -1,10 +1,9 @@
 <?php
+
 namespace Payfast\Payfast\Gateway\Request;
 
 /**
- * Copyright (c) 2023 Payfast (Pty) Ltd
- * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
+ * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
 use Magento\Framework\App\ObjectManager;
@@ -13,6 +12,7 @@ use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Payfast\Payfast\Model\Config;
 use Psr\Log\LoggerInterface;
+use Magento\Framework\App\ProductMetadataInterface;
 
 class AuthorizationRequest implements BuilderInterface
 {
@@ -47,8 +47,7 @@ class AuthorizationRequest implements BuilderInterface
     }
 
     /**
-     * if this was a cc payment then we would append cc fields in and dispatch it.
-     * Builds ENV request
+     * Builds ENV request if this was a cc payment then we would append cc fields in and dispatch it.
      *
      * @param array $buildSubject
      *
@@ -92,9 +91,8 @@ class AuthorizationRequest implements BuilderInterface
                 'm_payment_id'  => $order->getOrderIncrementId(),
                 'amount'        => $order->getGrandTotalAmount(),
 
-                // 'item_name' => $this->_storeManager->getStore()->getName() .', Order #'. $order->getOrderIncrementId(),
-                'item_name'     => 'Order #' . $order->getOrderIncrementId(),
-                'currency'      => $order->getCurrencyCode(),
+                'item_name' => 'Order #' . $order->getOrderIncrementId(),
+                'currency'  => $order->getCurrencyCode(),
 
             ];
             $pfOutput    = '';
@@ -113,9 +111,9 @@ class AuthorizationRequest implements BuilderInterface
             }
 
             $this->logger->debug($pre . 'pfOutput for signature is : ' . $pfOutput);
-
+            //@codingStandardsIgnoreStart
             $pfSignature = md5($pfOutput);
-
+            //@codingStandardsIgnoreEnd
             $data['signature']  = $pfSignature;
             $data['user_agent'] = 'Magento ' . $this->getAppVersion();
 
@@ -131,14 +129,14 @@ class AuthorizationRequest implements BuilderInterface
     }
 
     /**
-     * getAppVersion
+     * Get the App version
      *
      * @return string
      */
     private function getAppVersion()
     {
         $objectManager = ObjectManager::getInstance();
-        $version       = $objectManager->get('Magento\Framework\App\ProductMetadataInterface')->getVersion();
+        $version       = $objectManager->get(ProductMetadataInterface::class)->getVersion();
 
         return (preg_match('([0-9])', $version)) ? $version : '2.0.0';
     }

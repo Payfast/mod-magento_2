@@ -1,4 +1,5 @@
 <?php
+
 namespace Payfast\Payfast\Block;
 
 use Magento\Framework\Phrase;

@@ -3,7 +3,7 @@
   "description": "Payfast Module - Magento v2.4.4+",
   "license": "proprietary",
   "homepage": "https://payfast.io",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "minimum-stability": "dev",
   "authors": [
     {
@@ -11,6 +11,10 @@
       "email": "info@appinlet.com"
     }
   ],
+  "require": {
+    "php": "^8.1",
+    "payfast/payfast-common": "v1.0.2"
+  },
   "support": {
     "email": "support@payfast.help"
   },

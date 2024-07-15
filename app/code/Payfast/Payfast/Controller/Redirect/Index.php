@@ -1,8 +1,6 @@
 <?php
 /**
- * Copyright (c) 2023 Payfast (Pty) Ltd
- * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
+ * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
 namespace Payfast\Payfast\Controller\Redirect;
@@ -10,6 +8,7 @@ namespace Payfast\Payfast\Controller\Redirect;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Result\PageFactory;
 use Payfast\Payfast\Controller\AbstractPayfast;
+use Payfast\PayfastCommon;
 
 /**
  * Responsible for loading page content.
@@ -20,14 +19,13 @@ use Payfast\Payfast\Controller\AbstractPayfast;
 class Index extends AbstractPayfast
 {
     /**
-     * execute
-     * this method illustrate magento2 super power.
+     * Execute: This method illustrate magento2 super power.
      */
 
     public function execute()
     {
         $pre = __METHOD__ . " : ";
-        pflog($pre . 'bof');
+        $this->payfastLogger->info($pre . 'bof');
 
         $page_object = $this->pageFactory->create();
 
