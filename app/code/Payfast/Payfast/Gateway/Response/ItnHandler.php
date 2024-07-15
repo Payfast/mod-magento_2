@@ -1,4 +1,5 @@
 <?php
+
 namespace Payfast\Payfast\Gateway\Response;
 
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
@@ -8,8 +9,11 @@ use Psr\Log\LoggerInterface;
 
 class ItnHandler implements HandlerInterface
 {
-    const TXN_ID = 'TXN_ID';
+    public const TXN_ID = 'TXN_ID';
 
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
     /**

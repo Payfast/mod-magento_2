@@ -1,4 +1,5 @@
 <?php
+
 namespace Payfast\Payfast\Gateway\Http;
 
 use Magento\Payment\Gateway\Http\TransferBuilder;

@@ -1,8 +1,6 @@
 <?php
 /**
- * Copyright (c) 2023 Payfast (Pty) Ltd
- * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
+ * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
 namespace Payfast\Payfast\Model;
@@ -97,7 +95,7 @@ class Cart extends \Magento\Payment\Model\Cart
         }
 
         if (empty($this->_transferFlags[self::AMOUNT_DISCOUNT])) {
-            $sum -= $this->getDiscount();
+            $sum                    -= $this->getDiscount();
             $this->_areAmountsValid = round($this->getDiscount(), 4) < round($itemsSubtotal, 4);
         } else {
             $this->_areAmountsValid = $itemsSubtotal > 0.00001;

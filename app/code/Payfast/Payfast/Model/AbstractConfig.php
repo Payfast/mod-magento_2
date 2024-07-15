@@ -1,8 +1,6 @@
 <?php
 /**
- * Copyright (c) 2023 Payfast (Pty) Ltd
- * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
+ * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
 namespace Payfast\Payfast\Model;
@@ -21,21 +19,18 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
      * #@+
      * Payment actions
      */
-    const PAYMENT_ACTION_SALE = 'Sale';
+    public const PAYMENT_ACTION_SALE = 'Sale';
 
-    const PAYMENT_ACTION_AUTH = 'Authorization';
+    public const PAYMENT_ACTION_AUTH = 'Authorization';
 
-    const PAYMENT_ACTION_ORDER = 'Order';
+    public const PAYMENT_ACTION_ORDER = 'Order';
 
-    const ACTION_ORDER = 'order';
+    public const ACTION_ORDER = 'order';
 
-    const ACTION_AUTHORIZE = 'authorize';
+    public const ACTION_AUTHORIZE = 'authorize';
 
-    const ACTION_AUTHORIZE_CAPTURE = 'authorize_capture';
+    public const ACTION_AUTHORIZE_CAPTURE = 'authorize_capture';
 
-    /**
-     * #@-
-     */
     /**
      * Core store config
      *
@@ -74,6 +69,8 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
     }
 
     /**
+     * Check if is active
+     *
      * @return null|string
      */
     public function isActive()
@@ -141,11 +138,10 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
      * Returns payment configuration value
      *
      * @param string $key
-     * @param null $storeId
+     * @param int $storeId
      *
-     * @return null|string
+     * @return string
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function getValue($key, $storeId = null)
     {
@@ -193,7 +189,7 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
     /**
      * Check whether method available for checkout or not
      *
-     * @param null $methodCode
+     * @param string $methodCode
      *
      * @return bool
      */
@@ -211,7 +207,6 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
      *
      * @return bool
      *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function isMethodActive($method)
     {
@@ -221,12 +216,11 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
                         'payment/' . $this->getMethodCode() . '/active',
                         ScopeInterface::SCOPE_STORE,
                         $this->_storeId
-                    ) ||
-                             $this->_scopeConfig->isSetFlag(
-                                 'payment/' . $this->getMethodCode() . '/active',
-                                 ScopeInterface::SCOPE_STORE,
-                                 $this->_storeId
-                             );
+                    ) || $this->_scopeConfig->isSetFlag(
+                        'payment/' . $this->getMethodCode() . '/active',
+                        ScopeInterface::SCOPE_STORE,
+                        $this->_storeId
+                    );
                 $method    = $this->getMethodCode();
                 break;
             default:
@@ -248,7 +242,6 @@ abstract class AbstractConfig extends \Magento\Payment\Gateway\Config\Config imp
      *
      * @return bool
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function isMethodSupportedForCountry($method = null, $countryCode = null)
     {

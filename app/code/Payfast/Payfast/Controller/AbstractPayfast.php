@@ -1,20 +1,16 @@
 <?php
 /**
- * Copyright (c) 2023 Payfast (Pty) Ltd
- * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
+ * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
 namespace Payfast\Payfast\Controller;
-
-require_once dirname(__FILE__) . '/../Model/payfast_common.inc';
-
 
 use Magento\Customer\Model\Session;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\ActionFlag;
 use Magento\Framework\App\ActionInterface;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Response\RedirectInterface;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\Raw;
@@ -32,9 +28,12 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Order;
 use Magento\Sales\Model\ResourceModel\Order\Payment\Transaction;
+use Payfast\Payfast\Logger\Logger as Monolog;
 use Payfast\Payfast\Model\Config;
 use Payfast\Payfast\Model\Payfast;
 use Psr\Log\LoggerInterface;
+use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\App\Request\Http;
 
 /**
  * Abstract Payfast Checkout Controller
@@ -51,7 +50,6 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      * @var array
      */
     protected $_checkoutTypes = [];
-
     /**
      * @var ObjectManagerInterface and I could place this as property type but it will break lower php versions
      */
@@ -60,29 +58,26 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      * @var Config
      */
     protected $_config;
-
     /**
      * @var Quote
      */
     protected $_quote = false;
-
     /**
      * @var RedirectInterface
      */
     protected $_redirect;
-
     /**
      * Config mode type
      *
      * @var string
      */
-    protected $_configType = 'Payfast\Payfast\Model\Config';
-
+    protected $_configType = Config::class;
     /**
-     * Config method type @var string
+     * Config method type
+     *
+     * @var string
      */
     protected $_configMethod = Config::METHOD_CODE;
-
     /**
      * Checkout mode type
      *
@@ -93,84 +88,90 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      * @var ActionFlag
      */
     protected $_actionFlag;
-
     /**
      * @var Session
      */
     protected $customerSession;
-
     /**
      * @var \Magento\Checkout\Model\Session $checkoutSession
      */
     protected $checkoutSession;
-
     /**
      * @var OrderFactory
      */
     protected $orderFactory;
-
     /**
      * @var Generic
      */
     protected $_payfastSession;
-
     /**
      * @var Data
      */
     protected $urlHelper;
-
     /**
      * @var Order $orderResourceModel
      */
     protected $orderResourceModel;
-
     /**
      * @var LoggerInterface
      */
     protected $_logger;
-
     /**
      * @var \Magento\Sales\Model\Order $_order
      */
     protected $_order;
-
     /**
      * @var PageFactory
      */
     protected $_pageFactory;
-
     /**
      * @var Transaction $salesTransactionResourceModel
      */
     protected $salesTransactionResourceModel;
-
     /**
      * @var TransactionFactory
      */
     protected $transactionFactory;
-
     /**
      * @var Payfast $paymentMethod
      */
     protected $paymentMethod;
-
+    /**
+     * @var PageFactory
+     */
     protected $pageFactory;
-
+    /**
+     * @var OrderSender
+     */
     protected $orderSender;
-
+    /**
+     * @var InvoiceSender
+     */
     protected $invoiceSender;
-
     /**
      * @var ResponseInterface
      */
     protected $_response;
-
+    /**
+     * @var RequestInterface
+     */
     protected $_request;
-
     /**
      * @var MessageManagerInterface
      */
     protected $messageManager;
+    /**
+     * @var ResultFactory
+     */
+    protected ResultFactory $resultFactory;
+    /**
+     * @var Http
+     */
+    protected $request;
+    /**
+     * @var Monolog
+     */
+    protected Monolog $payfastLogger;
 
     /**
      * @param Context $context
@@ -187,6 +188,10 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param Transaction $salesTransactionResourceModel
+     * @param Raw $rawResult
+     * @param ResultFactory $resultFactory
+     * @param Http $request
+     * @param Monolog $payfastLogger
      */
     public function __construct(
         Context $context,
@@ -203,7 +208,10 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         Transaction $salesTransactionResourceModel,
-        Raw $rawResult
+        Raw $rawResult,
+        ResultFactory $resultFactory,
+        Http $request,
+        Monolog $payfastLogger
     ) {
         $pre = __METHOD__ . " : ";
 
@@ -233,6 +241,9 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
         $this->_response                     = $context->getResponse();
         $this->_actionFlag                   = $context->getActionFlag();
         $this->messageManager                = $context->getMessageManager();
+        $this->resultFactory                 = $resultFactory;
+        $this->request                       = $request;
+        $this->payfastLogger                 = $payfastLogger;
 
         $this->_config = $this->_objectManager->create($this->_configType, $parameters);
 
@@ -248,8 +259,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      *
      * @param string $field i.e merchant_id, server
      *
-     * @return                                        mixed
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @return mixed
      */
     public function getConfigData($field)
     {
@@ -301,7 +311,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
     }
 
     /**
-     * handle response
+     * Handle response
      *
      * @return ResponseInterface
      */
@@ -392,7 +402,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
     /**
      * Used to be part of inherited abstractAction now we need to code it in.
      *
-     * @param $path
+     * @param string $path
      * @param array $arguments
      *
      * @return ResponseInterface
@@ -403,5 +413,4 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
 
         return $this->getResponse();
     }
-
 }

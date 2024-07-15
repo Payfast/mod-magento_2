@@ -1,8 +1,6 @@
 <?php
 /**
- * Copyright (c) 2023 Payfast (Pty) Ltd
- * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
+ * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
 namespace Payfast\Payfast\Model;
@@ -17,37 +15,38 @@ use Psr\Log\LoggerInterface;
 /**
  * Config model that is aware of all \Payfast\Payfast payment methods
  * Works with Payfast-specific system configuration
- *
- * @SuppressWarnings(PHPMD.ExcesivePublicCount)
- * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class Config extends AbstractConfig
 {
 
     /**
-     * @var Payfast this is a model which we will use.
+     *
      */
-    const METHOD_CODE = 'payfast';
+    public const METHOD_CODE = 'payfast';
 
     /**
      * @var string should this module send confirmation email
      */
-    const KEY_SEND_CONFIRMATION_EMAIL = 'allowed_confirmation_email';
+    public const KEY_SEND_CONFIRMATION_EMAIL = 'allowed_confirmation_email';
 
     /**
      * @var string should this module send invoice email
      */
-    const KEY_SEND_INVOICE_EMAIL = 'allowed_confirmation_email';
+    public const KEY_SEND_INVOICE_EMAIL = 'allowed_confirmation_email';
 
     /**
-     * Core data
+     *
      */
     protected $directoryHelper;
 
+    /**
+     *
+     */
     protected $_supportedBuyerCountryCodes = ['ZA'];
 
     /**
-     * Currency codes supported by Payfast methods @var string[]
+     * Currency codes supported by Payfast methods
+     *
      */
     protected $_supportedCurrencyCodes = ['ZAR'];
     /**
@@ -115,7 +114,9 @@ class Config extends AbstractConfig
     }
 
     /**
-     * getPaidSuccessUrl
+     * Get the successful url for a paid transaction
+     *
+     * @return string
      */
     public function getPaidSuccessUrl()
     {
@@ -123,7 +124,9 @@ class Config extends AbstractConfig
     }
 
     /**
-     * getPaidCancelUrl
+     * Get the payment cancelled url
+     *
+     * @return string
      */
     public function getPaidCancelUrl()
     {
@@ -131,7 +134,9 @@ class Config extends AbstractConfig
     }
 
     /**
-     * getPaidNotifyUrl
+     * Get the payment notify url
+     *
+     * @return string
      */
     public function getPaidNotifyUrl()
     {
@@ -139,23 +144,22 @@ class Config extends AbstractConfig
     }
 
     /**
-     * Check whether method available for checkout or not
-     * Logic based on merchant country, methods dependence
+     * Check whether method available for checkout or not. Logic based on merchant country, methods dependence
      *
      * @param string|null $methodCode
      *
-     * @return                                       bool
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @return bool
      */
     public function isMethodAvailable($methodCode = null)
     {
+        // This method override is kept for potential future modifications
+        // or to maintain consistency in method signatures.
         return parent::isMethodAvailable($methodCode);
     }
 
     /**
      * Return buyer country codes supported by Payfast
      *
-     * @return string[]
      */
     public function getSupportedBuyerCountryCodes()
     {
@@ -173,8 +177,7 @@ class Config extends AbstractConfig
     }
 
     /**
-     * Check whether method supported for specified country or not
-     * Use $_methodCode and merchant country by default
+     * Check whether method supported for specified country or not. Use $_methodCode and merchant country by default
      *
      * @param string|null $method
      * @param string|null $countryCode
@@ -199,8 +202,7 @@ class Config extends AbstractConfig
      *
      * @param string|null $countryCode 2-letters iso code
      *
-     * @return                                        array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @return array
      */
     public function getCountryMethods($countryCode = null)
     {
@@ -218,8 +220,7 @@ class Config extends AbstractConfig
     }
 
     /**
-     * Get Payfast "mark" image URL
-     * may be his can be place in the config xml
+     * Get Payfast "mark" image URL. May be his can be place in the config xml
      *
      * @return string
      */
@@ -229,8 +230,7 @@ class Config extends AbstractConfig
     }
 
     /**
-     * Get "What Is Payfast" localized URL
-     * Supposed to be used with "mark" as popup window
+     * Get "What Is Payfast" localized URL. Supposed to be used with "mark" as popup window
      *
      * @return string
      */
@@ -295,13 +295,11 @@ class Config extends AbstractConfig
     }
 
     /**
-     * _mapPayfastFieldset
      * Map Payfast config fields
      *
      * @param string $fieldName
      *
-     * @return                                       string|null
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @return string|null
      */
     protected function _mapPayfastFieldset($fieldName)
     {
@@ -313,9 +311,7 @@ class Config extends AbstractConfig
      *
      * @param string $fieldName
      *
-     * @return                                       string|null
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @return string|null
      */
     protected function _getSpecificConfigPath($fieldName)
     {

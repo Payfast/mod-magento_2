@@ -1,10 +1,9 @@
 <?php
+
 namespace Payfast\Payfast\Gateway\Config;
 
 /**
- * Copyright (c) 2023 Payfast (Pty) Ltd
- * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason, you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
+ * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
 use Magento\Payment\Gateway\Config\ValueHandlerInterface;
@@ -13,7 +12,9 @@ use Magento\Sales\Model\Order\Payment;
 
 class CanAuthorizeHandler implements ValueHandlerInterface
 {
-    /* @var SubjectReader */
+    /**
+     * @var SubjectReader
+     */
     private $subjectReader;
 
     /**
@@ -32,8 +33,7 @@ class CanAuthorizeHandler implements ValueHandlerInterface
      * @param array $subject
      * @param int|null $storeId
      *
-     * @return                                        mixed
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @return mixed
      */
     public function handle(array $subject, $storeId = null)
     {
