@@ -62,6 +62,7 @@ class Config extends AbstractConfig
      * @var Repository
      */
     protected $_assetRepo;
+    protected StoreManagementInterface $_storeManager;
 
     /**
      * @param ScopeConfigInterface $scopeConfig
