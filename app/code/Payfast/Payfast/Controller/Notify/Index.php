@@ -38,7 +38,7 @@ class Index extends AbstractPayfast implements CsrfAwareActionInterface, HttpPos
         define('PF_SOFTWARE_NAME', 'Magento');
         define('PF_SOFTWARE_VER', '2.4.6');
         define('PF_MODULE_NAME', 'Payfast-Magento');
-        define('PF_MODULE_VER', '2.5.0');
+        define('PF_MODULE_VER', '2.5.1');
 
         $this->_logger->debug('Notify: ' . json_encode($this->request->getPostValue()));
         $pre = __METHOD__ . " : ";

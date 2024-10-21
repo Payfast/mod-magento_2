@@ -1,6 +1,6 @@
 # mod-magento_2
 
-## Payfast module v2.5.0 for Magento v2.4.6
+## Payfast module v2.5.1 for Magento v2.4.7
 
 This is the Payfast module for Magento 2. Please feel free
 to [contact the Payfast support team](https://payfast.io/contact/) should you require any assistance.

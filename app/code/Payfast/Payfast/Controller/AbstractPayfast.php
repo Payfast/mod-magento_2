@@ -20,6 +20,7 @@ use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Session\Generic;
 use Magento\Framework\Url\Helper\Data;
+use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteRepository;
@@ -172,6 +173,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      * @var Monolog
      */
     protected Monolog $payfastLogger;
+    protected UrlInterface $_url;
 
     /**
      * @param Context $context
