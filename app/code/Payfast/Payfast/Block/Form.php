@@ -10,34 +10,38 @@ use Magento\Framework\Locale\ResolverInterface;
 use Magento\Framework\View\Element\Template\Context;
 use Payfast\Payfast\Helper\Data;
 use Payfast\Payfast\Model\Config;
+use Payfast\Payfast\Model\ConfigFactory;
 use Payfast\Payfast\Model\PayfastConfigProvider;
 
+/**
+ * Form class
+ */
 class Form extends \Magento\Payment\Block\Form
 {
     /**
      * @var string Payment method code
      */
-    protected $_methodCode = Config::METHOD_CODE;
+    protected string $_methodCode = Config::METHOD_CODE;
 
     /**
      * @var Data
      */
-    protected $_payfastData;
+    protected Data $_payfastData;
 
     /**
-     * @var \Payfast\Payfast\Model\ConfigFactory
+     * @var ConfigFactory|PayfastConfigProvider
      */
-    protected $payfastConfigFactory;
+    protected PayfastConfigProvider|ConfigFactory $payfastConfigFactory;
 
     /**
      * @var ResolverInterface
      */
-    protected $_localeResolver;
+    protected ResolverInterface $_localeResolver;
 
     /**
-     * @var \Payfast\Payfast\Model\Config
+     * @var Config
      */
-    protected $_config;
+    protected Config $_config;
 
     /**
      * @var bool
@@ -47,11 +51,11 @@ class Form extends \Magento\Payment\Block\Form
     /**
      * @var CurrentCustomer
      */
-    protected $currentCustomer;
+    protected CurrentCustomer $currentCustomer;
 
     /**
      * @param Context $context
-     * @param \Payfast\Payfast\Model\ConfigFactory $payfastConfigFactory
+     * @param PayfastConfigProvider $payfastConfigFactory
      * @param ResolverInterface $localeResolver
      * @param Data $payfastData
      * @param CurrentCustomer $currentCustomer
@@ -65,7 +69,7 @@ class Form extends \Magento\Payment\Block\Form
         CurrentCustomer $currentCustomer,
         array $data = []
     ) {
-        $pre                        = __METHOD__ . " : ";
+        $pre                        = __METHOD__ . ' : ';
         $this->_payfastData         = $payfastData;
         $this->payfastConfigFactory = $payfastConfigFactory;
         parent::__construct($context, $data);
@@ -74,7 +78,7 @@ class Form extends \Magento\Payment\Block\Form
 
         $this->_isScopePrivate = true;
         $this->currentCustomer = $currentCustomer;
-        $this->_logger->debug($pre . "eof");
+        $this->_logger->debug($pre . 'eof');
     }
 
     /**
@@ -82,12 +86,17 @@ class Form extends \Magento\Payment\Block\Form
      *
      * @return string  'payfast'
      */
-    public function getMethodCode()
+    public function getMethodCode(): string
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
 
-        return $this->_methodCode;
+        // Call the parent method to retain any parent functionality
+        $parentMethodCode = parent::getMethodCode();
+
+        // You can choose to either return the parent method's value
+        // or use the existing logic if needed
+        return $this->_methodCode ?? $parentMethodCode;
     }
 
     /**
@@ -95,9 +104,11 @@ class Form extends \Magento\Payment\Block\Form
      *
      * @return void
      */
-    protected function _construct()
+    protected function _construct(): void
     {
-        $pre = __METHOD__ . " : ";
+        parent::_construct();
+
+        $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
         $this->_config = $this->payfastConfigFactory->create()->setMethod($this->getMethodCode());
     }

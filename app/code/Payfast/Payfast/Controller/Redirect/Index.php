@@ -5,7 +5,11 @@
 
 namespace Payfast\Payfast\Controller\Redirect;
 
+use Exception;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 use Payfast\Payfast\Controller\AbstractPayfast;
 use Payfast\PayfastCommon;
@@ -22,9 +26,9 @@ class Index extends AbstractPayfast
      * Execute: This method illustrate magento2 super power.
      */
 
-    public function execute()
+    public function execute(): Page|ResultInterface|ResponseInterface
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->payfastLogger->info($pre . 'bof');
 
         $page_object = $this->pageFactory->create();
@@ -35,7 +39,7 @@ class Index extends AbstractPayfast
             $this->_logger->error($pre . $e->getMessage());
             $this->messageManager->addExceptionMessage($e, $e->getMessage());
             $this->_redirect('checkout/cart');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_logger->error($pre . $e->getMessage());
             $this->messageManager->addExceptionMessage($e, __('We can\'t start Payfast Checkout.'));
             $this->_redirect('checkout/cart');

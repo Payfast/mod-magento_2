@@ -13,12 +13,15 @@ use Magento\Sales\Model\Order;
 use Payfast\Payfast\Model\Config;
 use Psr\Log\LoggerInterface as LoggerInterfaceAlias;
 
+/**
+ * SalesOrderBeforeSaveObserver class
+ */
 class SalesOrderBeforeSaveObserver implements ObserverInterface
 {
     /**
      * @var LoggerInterfaceAlias
      */
-    private $_logger;
+    private LoggerInterfaceAlias $_logger;
 
     /**
      * SalesOrderBeforeSaveObserver constructor.
@@ -38,9 +41,9 @@ class SalesOrderBeforeSaveObserver implements ObserverInterface
      * @return $this
      * @throws LocalizedException
      */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): static
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
 
         /**

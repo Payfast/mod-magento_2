@@ -10,6 +10,9 @@ use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
 
+/**
+ * ClientMock class
+ */
 class ClientMock implements ClientInterface
 {
     public const SUCCESS = 1;
@@ -18,7 +21,7 @@ class ClientMock implements ClientInterface
     /**
      * @var Logger
      */
-    private $logger;
+    private Logger $logger;
 
     /**
      * Constructor
@@ -36,9 +39,9 @@ class ClientMock implements ClientInterface
      *
      * @param TransferInterface $transferObject
      *
-     * @return Object
+     * @return array
      */
-    public function placeRequest(TransferInterface $transferObject)
+    public function placeRequest(TransferInterface $transferObject): array
     {
         // TODO: Implement placeRequest() method.
         $response = $this->generateResponseForCode(
@@ -65,7 +68,7 @@ class ClientMock implements ClientInterface
      *
      * @return array
      */
-    protected function generateResponseForCode($resultCode)
+    protected function generateResponseForCode(string $resultCode): array
     {
         return array_merge(
             [
@@ -81,7 +84,7 @@ class ClientMock implements ClientInterface
      *
      * @return string
      */
-    protected function generateTxnId()
+    protected function generateTxnId(): string
     {
         //@codingStandardsIgnoreStart
         return md5(mt_rand(0, 1000));
@@ -95,7 +98,7 @@ class ClientMock implements ClientInterface
      *
      * @return int
      */
-    private function getResultCode(TransferInterface $transfer)
+    private function getResultCode(TransferInterface $transfer): int
     {
         $headers = $transfer->getHeaders();
 
@@ -113,18 +116,19 @@ class ClientMock implements ClientInterface
      *
      * @return array
      */
-    private function getFieldsBasedOnResponseType($resultCode)
+    private function getFieldsBasedOnResponseType(int $resultCode): array
     {
-        switch ($resultCode) {
-            case self::FAILURE:
-                return [
-                    'FRAUD_MSG_LIST' => [
-                        'Stolen card',
-                        'Customer location differs'
-                    ]
-                ];
+        $fraudMessage = [];
+
+        if ($resultCode === self::FAILURE) {
+            $fraudMessage = [
+                'FRAUD_MSG_LIST' => [
+                    'Stolen card',
+                    'Customer location differs'
+                ]
+            ];
         }
 
-        return [];
+        return $fraudMessage;
     }
 }

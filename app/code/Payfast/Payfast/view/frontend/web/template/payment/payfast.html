@@ -3,14 +3,17 @@ You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin
 Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.-->
 <div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
     <div class="payment-method-title field choice">
-        <input class="radio"
-               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"
-               name="payment[method]"
-               type="radio">
+        <label>
+            <input class="radio"
+                   data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"
+                   name="payment[method]"
+                   type="radio">
+        </label>
         <label class="label" data-bind="attr: {'for': getCode()}">
             <!-- Payfast Logo -->
             <img alt=""
                  class="payment-icon"
+                 src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA="
                  data-bind="attr: {src: getPaymentAcceptanceMarkSrc(), alt: $t('Acceptance Mark')}"
             />
             <!-- Payfast Logo -->

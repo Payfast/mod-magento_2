@@ -5,6 +5,9 @@ namespace Payfast\Payfast\Block;
 use Magento\Framework\Phrase;
 use Magento\Payment\Block\ConfigurableInfo;
 
+/**
+ * Info class
+ */
 class Info extends ConfigurableInfo
 {
     /**
@@ -16,6 +19,8 @@ class Info extends ConfigurableInfo
      */
     protected function getLabel($field): Phrase
     {
+        parent::getLabel($field);
+
         return __($field);
     }
 }

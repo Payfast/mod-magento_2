@@ -6,6 +6,8 @@ namespace Payfast\Payfast\Gateway\Request;
  * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
+use Exception;
+use InvalidArgumentException;
 use Magento\Framework\App\ObjectManager;
 use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
@@ -14,23 +16,26 @@ use Payfast\Payfast\Model\Config;
 use Psr\Log\LoggerInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 
+/**
+ * AuthorizationRequest class
+ */
 class AuthorizationRequest implements BuilderInterface
 {
 
     /**
      * @var Config
      */
-    private $payfastConfig;
+    private Config $payfastConfig;
 
     /**
      * @var ConfigInterface
      */
-    private $config;
+    private ConfigInterface $config;
 
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @param ConfigInterface $config
@@ -52,9 +57,9 @@ class AuthorizationRequest implements BuilderInterface
      * @param array $buildSubject
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function build(array $buildSubject)
+    public function build(array $buildSubject): array
     {
         $pre = __METHOD__ . ' : ';
 
@@ -63,7 +68,7 @@ class AuthorizationRequest implements BuilderInterface
         if (!isset($buildSubject['payment'])
             || !$buildSubject['payment'] instanceof PaymentDataObjectInterface
         ) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
+            throw new InvalidArgumentException('Payment data object should be provided');
         }
         try {
             $payment = $buildSubject['payment'];
@@ -118,7 +123,7 @@ class AuthorizationRequest implements BuilderInterface
             $data['user_agent'] = 'Magento ' . $this->getAppVersion();
 
             $this->logger->debug($pre . 'generated  signature : ' . $data['signature']);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->critical($pre . $exception->getTraceAsString());
             throw $exception;
         }
@@ -133,7 +138,7 @@ class AuthorizationRequest implements BuilderInterface
      *
      * @return string
      */
-    private function getAppVersion()
+    private function getAppVersion(): string
     {
         $objectManager = ObjectManager::getInstance();
         $version       = $objectManager->get(ProductMetadataInterface::class)->getVersion();

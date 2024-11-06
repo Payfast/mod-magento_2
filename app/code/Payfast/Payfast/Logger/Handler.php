@@ -5,6 +5,9 @@ namespace Payfast\Payfast\Logger;
 use Magento\Framework\Logger\Handler\Base;
 use Monolog\Logger;
 
+/**
+ * Handler class
+ */
 class Handler extends Base
 {
     /**

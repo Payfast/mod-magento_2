@@ -37,31 +37,31 @@ class Config extends AbstractConfig
     /**
      *
      */
-    protected $directoryHelper;
+    protected Data $directoryHelper;
 
     /**
      *
      */
-    protected $_supportedBuyerCountryCodes = ['ZA'];
+    protected array $_supportedBuyerCountryCodes = ['ZA'];
 
     /**
      * Currency codes supported by Payfast methods
      *
      */
-    protected $_supportedCurrencyCodes = ['ZAR'];
+    protected array $_supportedCurrencyCodes = ['ZAR'];
     /**
      * @var LoggerInterface
      */
-    protected $_logger;
+    protected LoggerInterface $_logger;
 
     /**
      * @var UrlInterface
      */
-    protected $_urlBuilder;
+    protected UrlInterface $_urlBuilder;
     /**
      * @var Repository
      */
-    protected $_assetRepo;
+    protected Repository $_assetRepo;
     protected StoreManagementInterface $_storeManager;
 
     /**
@@ -80,7 +80,7 @@ class Config extends AbstractConfig
         LoggerInterface $logger,
         Repository $assetRepo,
         UrlInterface $urlBuilder,
-        $params = []
+        array $params = []
     ) {
         $this->_logger = $logger;
         parent::__construct($scopeConfig);
@@ -106,9 +106,9 @@ class Config extends AbstractConfig
      * @see    \Magento\Quote\Model\Quote\Payment::getCheckoutRedirectUrl()
      * @see    \Magento\Checkout\Controller\Onepage::savePaymentAction()
      */
-    public function getCheckoutRedirectUrl()
+    public function getCheckoutRedirectUrl(): string
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
 
         return $this->_urlBuilder->getUrl('payfast/redirect');
@@ -119,7 +119,7 @@ class Config extends AbstractConfig
      *
      * @return string
      */
-    public function getPaidSuccessUrl()
+    public function getPaidSuccessUrl(): string
     {
         return $this->_urlBuilder->getUrl('payfast/redirect/success', ['_secure' => true]);
     }
@@ -129,7 +129,7 @@ class Config extends AbstractConfig
      *
      * @return string
      */
-    public function getPaidCancelUrl()
+    public function getPaidCancelUrl(): string
     {
         return $this->_urlBuilder->getUrl('payfast/redirect/cancel', ['_secure' => true]);
     }
@@ -139,7 +139,7 @@ class Config extends AbstractConfig
      *
      * @return string
      */
-    public function getPaidNotifyUrl()
+    public function getPaidNotifyUrl(): string
     {
         return $this->_urlBuilder->getUrl('payfast/notify', ['_secure' => true]);
     }
@@ -151,7 +151,7 @@ class Config extends AbstractConfig
      *
      * @return bool
      */
-    public function isMethodAvailable($methodCode = null)
+    public function isMethodAvailable(string $methodCode = null): bool
     {
         // This method override is kept for potential future modifications
         // or to maintain consistency in method signatures.
@@ -162,7 +162,7 @@ class Config extends AbstractConfig
      * Return buyer country codes supported by Payfast
      *
      */
-    public function getSupportedBuyerCountryCodes()
+    public function getSupportedBuyerCountryCodes(): array
     {
         return $this->_supportedBuyerCountryCodes;
     }
@@ -172,7 +172,7 @@ class Config extends AbstractConfig
      *
      * @return string
      */
-    public function getMerchantCountry()
+    public function getMerchantCountry(): string
     {
         return $this->directoryHelper->getDefaultCountry($this->_storeId);
     }
@@ -185,8 +185,11 @@ class Config extends AbstractConfig
      *
      * @return bool
      */
-    public function isMethodSupportedForCountry($method = null, $countryCode = null)
+    public function isMethodSupportedForCountry(string $method = null, string $countryCode = null): bool
     {
+        // Call the parent method if it exists
+        $isParentSupported = parent::isMethodSupportedForCountry($method, $countryCode);
+
         if ($method === null) {
             $method = $this->getMethodCode();
         }
@@ -195,7 +198,8 @@ class Config extends AbstractConfig
             $countryCode = $this->getMerchantCountry();
         }
 
-        return in_array($method, $this->getCountryMethods($countryCode));
+        // Combine the result of the parent method with the custom logic
+        return $isParentSupported && in_array($method, $this->getCountryMethods($countryCode));
     }
 
     /**
@@ -205,7 +209,7 @@ class Config extends AbstractConfig
      *
      * @return array
      */
-    public function getCountryMethods($countryCode = null)
+    public function getCountryMethods(string $countryCode = null): array
     {
         $countryMethods = [
             'other' => [
@@ -217,7 +221,7 @@ class Config extends AbstractConfig
             return $countryMethods;
         }
 
-        return isset($countryMethods[$countryCode]) ? $countryMethods[$countryCode] : $countryMethods['other'];
+        return $countryMethods[$countryCode] ?? $countryMethods['other'];
     }
 
     /**
@@ -225,7 +229,7 @@ class Config extends AbstractConfig
      *
      * @return string
      */
-    public function getPaymentMarkImageUrl()
+    public function getPaymentMarkImageUrl(): string
     {
         return $this->_assetRepo->getUrl('Payfast_Payfast::images/logo.svg');
     }
@@ -235,7 +239,7 @@ class Config extends AbstractConfig
      *
      * @return string
      */
-    public function getPaymentMarkWhatIsPayfast()
+    public function getPaymentMarkWhatIsPayfast(): string
     {
         return 'Payfast Payment gateway';
     }
@@ -245,7 +249,7 @@ class Config extends AbstractConfig
      *
      * @return string|null
      */
-    public function getPaymentAction()
+    public function getPaymentAction(): ?string
     {
         $paymentAction = null;
         $pre           = __METHOD__ . ' : ';
@@ -279,18 +283,18 @@ class Config extends AbstractConfig
      *
      * @return bool
      */
-    public function isCurrencyCodeSupported($code)
+    public function isCurrencyCodeSupported(string $code): bool
     {
         $supported = false;
         $pre       = __METHOD__ . ' : ';
 
-        $this->_logger->debug($pre . "bof and code: {$code}");
+        $this->_logger->debug($pre . "bof and code: $code");
 
         if (in_array($code, $this->_supportedCurrencyCodes)) {
             $supported = true;
         }
 
-        $this->_logger->debug($pre . "eof and supported : {$supported}");
+        $this->_logger->debug($pre . "eof and supported : $supported");
 
         return $supported;
     }
@@ -302,9 +306,9 @@ class Config extends AbstractConfig
      *
      * @return string|null
      */
-    protected function _mapPayfastFieldset($fieldName)
+    protected function _mapPayfastFieldset(string $fieldName): ?string
     {
-        return "payment/{$this->_methodCode}/{$fieldName}";
+        return "payment/$this->_methodCode/$fieldName";
     }
 
     /**
@@ -314,8 +318,15 @@ class Config extends AbstractConfig
      *
      * @return string|null
      */
-    protected function _getSpecificConfigPath($fieldName)
+    protected function _getSpecificConfigPath(string $fieldName): ?string
     {
-        return $this->_mapPayfastFieldset($fieldName);
+        // Call the parent method (if applicable)
+        $parentPath = parent::_getSpecificConfigPath($fieldName);
+
+        // Your custom logic
+        $customPath = $this->_mapPayfastFieldset($fieldName);
+
+        // Return the custom path or combine it with the parent result if needed
+        return $customPath ?: $parentPath;
     }
 }

@@ -16,6 +16,7 @@ use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\Raw;
 use Magento\Framework\DB\TransactionFactory;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Session\Generic;
@@ -24,6 +25,7 @@ use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteRepository;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
@@ -35,6 +37,7 @@ use Payfast\Payfast\Model\Payfast;
 use Psr\Log\LoggerInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\App\Request\Http;
+use Magento\Framework\App\Response\Http as Response;
 
 /**
  * Abstract Payfast Checkout Controller
@@ -44,123 +47,123 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
     /**
      * @var Raw $rawResult
      */
-    protected $rawResult;
+    protected Raw $rawResult;
     /**
      * Internal cache of checkout models
      *
      * @var array
      */
-    protected $_checkoutTypes = [];
+    protected array $_checkoutTypes = [];
     /**
      * @var ObjectManagerInterface and I could place this as property type but it will break lower php versions
      */
-    protected $_objectManager;
+    protected ObjectManagerInterface $_objectManager;
     /**
      * @var Config
      */
-    protected $_config;
+    protected mixed $_config;
     /**
-     * @var Quote
+     * @var bool|Quote
      */
-    protected $_quote = false;
+    protected Quote|bool $_quote = false;
     /**
      * @var RedirectInterface
      */
-    protected $_redirect;
+    protected RedirectInterface $_redirect;
     /**
      * Config mode type
      *
      * @var string
      */
-    protected $_configType = Config::class;
+    protected string $_configType = Config::class;
     /**
      * Config method type
      *
      * @var string
      */
-    protected $_configMethod = Config::METHOD_CODE;
+    protected string $_configMethod = Config::METHOD_CODE;
     /**
      * Checkout mode type
      *
      * @var string
      */
-    protected $_checkoutType;
+    protected string $_checkoutType;
     /**
      * @var ActionFlag
      */
-    protected $_actionFlag;
+    protected ActionFlag $_actionFlag;
     /**
      * @var Session
      */
-    protected $customerSession;
+    protected Session $customerSession;
     /**
      * @var \Magento\Checkout\Model\Session $checkoutSession
      */
-    protected $checkoutSession;
+    protected \Magento\Checkout\Model\Session $checkoutSession;
     /**
      * @var OrderFactory
      */
-    protected $orderFactory;
+    protected OrderFactory $orderFactory;
     /**
      * @var Generic
      */
-    protected $_payfastSession;
+    protected Generic $_payfastSession;
     /**
      * @var Data
      */
-    protected $urlHelper;
+    protected Data $urlHelper;
     /**
      * @var Order $orderResourceModel
      */
-    protected $orderResourceModel;
+    protected Order $orderResourceModel;
     /**
      * @var LoggerInterface
      */
-    protected $_logger;
+    protected LoggerInterface $_logger;
     /**
      * @var \Magento\Sales\Model\Order $_order
      */
-    protected $_order;
+    protected \Magento\Sales\Model\Order $_order;
     /**
      * @var PageFactory
      */
-    protected $_pageFactory;
+    protected PageFactory $_pageFactory;
     /**
      * @var Transaction $salesTransactionResourceModel
      */
-    protected $salesTransactionResourceModel;
+    protected Transaction $salesTransactionResourceModel;
     /**
      * @var TransactionFactory
      */
-    protected $transactionFactory;
+    protected TransactionFactory $transactionFactory;
     /**
      * @var Payfast $paymentMethod
      */
-    protected $paymentMethod;
+    protected Payfast $paymentMethod;
     /**
      * @var PageFactory
      */
-    protected $pageFactory;
+    protected PageFactory $pageFactory;
     /**
      * @var OrderSender
      */
-    protected $orderSender;
+    protected OrderSender $orderSender;
     /**
      * @var InvoiceSender
      */
-    protected $invoiceSender;
+    protected InvoiceSender $invoiceSender;
     /**
      * @var ResponseInterface
      */
-    protected $_response;
+    protected ResponseInterface $_response;
     /**
      * @var RequestInterface
      */
-    protected $_request;
+    protected RequestInterface $_request;
     /**
      * @var MessageManagerInterface
      */
-    protected $messageManager;
+    protected MessageManagerInterface $messageManager;
     /**
      * @var ResultFactory
      */
@@ -168,12 +171,13 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
     /**
      * @var Http
      */
-    protected $request;
+    protected Http $request;
     /**
      * @var Monolog
      */
     protected Monolog $payfastLogger;
     protected UrlInterface $_url;
+    protected OrderRepositoryInterface $orderRepository;
 
     /**
      * @param Context $context
@@ -194,6 +198,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      * @param ResultFactory $resultFactory
      * @param Http $request
      * @param Monolog $payfastLogger
+     * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
         Context $context,
@@ -213,9 +218,10 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
         Raw $rawResult,
         ResultFactory $resultFactory,
         Http $request,
-        Monolog $payfastLogger
+        Monolog $payfastLogger,
+        OrderRepositoryInterface $orderRepository
     ) {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
 
         $this->_logger = $logger;
 
@@ -246,6 +252,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
         $this->resultFactory                 = $resultFactory;
         $this->request                       = $request;
         $this->payfastLogger                 = $payfastLogger;
+        $this->orderRepository               = $orderRepository;
 
         $this->_config = $this->_objectManager->create($this->_configType, $parameters);
 
@@ -261,9 +268,9 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      *
      * @param string $field i.e merchant_id, server
      *
-     * @return mixed
+     * @return string
      */
-    public function getConfigData($field)
+    public function getConfigData(string $field): string
     {
         return $this->_config->getValue($field);
     }
@@ -273,7 +280,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      *
      * @return array
      */
-    public function getActionFlagList()
+    public function getActionFlagList(): array
     {
         return [];
     }
@@ -283,7 +290,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      *
      * @return string
      */
-    public function getLoginUrl()
+    public function getLoginUrl(): string
     {
         return $this->orderResourceModel->getLoginUrl();
     }
@@ -293,7 +300,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      *
      * @return string
      */
-    public function getRedirectActionName()
+    public function getRedirectActionName(): string
     {
         return 'index';
     }
@@ -303,11 +310,15 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      *
      * @return void
      */
-    public function redirectLogin()
+    public function redirectLogin(): void
     {
         $this->_actionFlag->set('', 'no-dispatch', true);
         $this->customerSession->setBeforeAuthUrl($this->_redirect->getRefererUrl());
-        $this->getResponse()->setRedirect(
+
+        // Cast the response to Http to ensure setRedirect() is valid
+        /** @var Response $response */
+        $response = $this->getResponse();
+        $response->setRedirect(
             $this->urlHelper->addRequestParam($this->orderResourceModel->getLoginUrl(), ['context' => 'checkout'])
         );
     }
@@ -328,9 +339,9 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      * @return void
      * @throws LocalizedException
      */
-    protected function _initCheckout()
+    protected function _initCheckout(): void
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
 
         $this->checkoutSession->loadCustomerQuote();
@@ -341,7 +352,9 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
             $phrase = __('We could not find "Order" for processing');
             $this->_logger->critical($pre . $phrase);
 
-            $this->getResponse()->setStatusHeader(404, '1.1', 'Not found');
+            /** @var Response $response */
+            $response = $this->getResponse();
+            $response->setStatusHeader(404, '1.1', 'Not found');
             throw new LocalizedException($phrase);
         }
 
@@ -382,7 +395,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      *
      * @return \Magento\Checkout\Model\Session
      */
-    protected function _getCheckoutSession()
+    protected function _getCheckoutSession(): \Magento\Checkout\Model\Session
     {
         return $this->checkoutSession;
     }
@@ -390,12 +403,16 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
     /**
      * Return checkout quote object
      *
-     * @return Quote
+     * @return bool|Quote
      */
-    protected function _getQuote()
+    protected function _getQuote(): bool|Quote
     {
         if (!$this->_quote) {
-            $this->_quote = $this->_getCheckoutSession()->getQuote();
+            try {
+                $this->_quote = $this->_getCheckoutSession()->getQuote();
+            } catch (NoSuchEntityException|LocalizedException $e) {
+                $this->_logger->error($e->getMessage());
+            }
         }
 
         return $this->_quote;
@@ -409,7 +426,7 @@ abstract class AbstractPayfast implements ActionInterface, HttpGetActionInterfac
      *
      * @return ResponseInterface
      */
-    protected function _redirect($path, $arguments = []): ResponseInterface
+    protected function _redirect(string $path, array $arguments = []): ResponseInterface
     {
         $this->_redirect->redirect($this->getResponse(), $path, $arguments);
 

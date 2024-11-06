@@ -3,7 +3,12 @@
 namespace Payfast\Payfast\Controller\Notify;
 
 // Execute logic with side effects (require autoloader)
-function requireAutoloader()
+/**
+ * Adds the autoload.php file from the common library
+ *
+ * @return void
+ */
+function requireAutoloader(): void
 {
     require_once __DIR__ . '/../../../../../../vendor/autoload.php';
 }
