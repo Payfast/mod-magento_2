@@ -10,53 +10,56 @@ use Magento\Customer\Helper\Session\CurrentCustomer;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Locale\ResolverInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
-use Magento\Payment\Model\Method\AbstractMethod;
+use Magento\Payment\Model\MethodInterface;
 use Payfast\Payfast\Helper\Data as PayfastHelper;
 use Psr\Log\LoggerInterface;
 
+/**
+ * PayfastConfigProvider class
+ */
 class PayfastConfigProvider implements ConfigProviderInterface
 {
     /**
      * @var ResolverInterface
      */
-    protected $localeResolver;
+    protected ResolverInterface $localeResolver;
 
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
 
     /**
      * @var CurrentCustomer
      */
-    protected $currentCustomer;
+    protected CurrentCustomer $currentCustomer;
 
     /**
      * @var LoggerInterface
      */
-    protected $_logger;
+    protected LoggerInterface $_logger;
 
     /**
      * @var PayfastHelper
      */
-    protected $payfastHelper;
+    protected PayfastHelper $payfastHelper;
 
     /**
      * @var string[]
      */
-    protected $methodCodes = [
+    protected array $methodCodes = [
         Config::METHOD_CODE
     ];
 
     /**
-     * @var AbstractMethod[]
+     * @var MethodInterface[]
      */
-    protected $methods = [];
+    protected array $methods = [];
 
     /**
      * @var PaymentHelper
      */
-    protected $paymentHelper;
+    protected PaymentHelper $paymentHelper;
 
     /**
      * @param LoggerInterface $logger
@@ -96,7 +99,7 @@ class PayfastConfigProvider implements ConfigProviderInterface
     /**
      * @inheritdoc
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
@@ -127,13 +130,13 @@ class PayfastConfigProvider implements ConfigProviderInterface
      *
      * @param string $code
      *
-     * @return mixed
+     * @return string
      */
-    protected function getMethodRedirectUrl($code)
+    protected function getMethodRedirectUrl(string $code): string
     {
         $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
-        $this->_logger->debug("code is : {$code}");
+        $this->_logger->debug("code is : $code");
 
         $methodUrl = $this->config->getCheckoutRedirectUrl();
 
@@ -147,9 +150,9 @@ class PayfastConfigProvider implements ConfigProviderInterface
      *
      * @param string $code
      *
-     * @return null|string
+     * @return bool
      */
-    protected function getBillingAgreementCode($code)
+    protected function getBillingAgreementCode(string $code): bool
     {
         $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
@@ -161,6 +164,6 @@ class PayfastConfigProvider implements ConfigProviderInterface
         $this->_logger->debug($pre . 'eof');
 
         // always return null
-        return $this->payfastHelper->shouldAskToCreateBillingAgreement($this->config, $customerId);
+        return $this->payfastHelper->shouldAskToCreateBillingAgreement();
     }
 }

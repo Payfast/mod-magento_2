@@ -10,39 +10,25 @@ use Magento\Payment\Gateway\Config\ValueHandlerInterface;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Sales\Model\Order\Payment;
 
+/**
+ * CanCaptureHandler class
+ */
 class CanCaptureHandler implements ValueHandlerInterface
 {
-
-    /**
-     * @var SubjectReader
-     */
-    private $subjectReader;
-
-    /**
-     * CanVoidHandler constructor.
-     *
-     * @param SubjectReader $subjectReader
-     */
-    public function __construct(
-        SubjectReader $subjectReader
-    ) {
-        $this->subjectReader = $subjectReader;
-    }
-
     /**
      * Retrieve method configured value
      *
      * @param array $subject
      * @param int|null $storeId
      *
-     * @return mixed
+     * @return bool
      */
-    public function handle(array $subject, $storeId = null)
+    public function handle(array $subject, $storeId = null): bool
     {
-        $paymentDO = $this->subjectReader->readPayment($subject);
+        $paymentDO = SubjectReader::readPayment($subject);
 
         $payment = $paymentDO->getPayment();
 
-        return $payment instanceof Payment && !(bool)$payment->getAmountPaid();
+        return $payment instanceof Payment && !$payment->getAmountPaid();
     }
 }

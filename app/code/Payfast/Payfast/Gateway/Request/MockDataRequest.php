@@ -6,10 +6,14 @@ namespace Payfast\Payfast\Gateway\Request;
  * Copyright (c) 2024 Payfast (Pty) Ltd
  */
 
+use InvalidArgumentException;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Payfast\Payfast\Gateway\Http\Client\ClientMock;
 
+/**
+ * MockDataRequest class
+ */
 class MockDataRequest implements BuilderInterface
 {
     public const FORCE_RESULT = 'FORCE_RESULT';
@@ -21,15 +25,12 @@ class MockDataRequest implements BuilderInterface
      *
      * @return array
      */
-    public function build(array $buildSubject)
+    public function build(array $buildSubject): array
     {
         if (!isset($buildSubject['payment']) || !$buildSubject['payment'] instanceof PaymentDataObjectInterface) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
+            throw new InvalidArgumentException('Payment data object should be provided');
         }
 
-        /**
-         * @var PaymentDataObjectInterface $paymentDO
-         */
         $paymentDO = $buildSubject['payment'];
         $payment   = $paymentDO->getPayment();
 

@@ -2,27 +2,18 @@
 
 namespace Payfast\Payfast\Gateway\Response;
 
+use InvalidArgumentException;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Response\HandlerInterface;
 use Magento\Sales\Model\Order\Payment;
-use Psr\Log\LoggerInterface;
+use UnexpectedValueException;
 
+/**
+ * ItnHandler class
+ */
 class ItnHandler implements HandlerInterface
 {
     public const TXN_ID = 'TXN_ID';
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @param LoggerInterface $logger
-     */
-    public function __construct(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
 
     /**
      * Handles response
@@ -32,19 +23,24 @@ class ItnHandler implements HandlerInterface
      *
      * @return void
      */
-    public function handle(array $handlingSubject, array $response)
+    public function handle(array $handlingSubject, array $response): void
     {
         if (!isset($handlingSubject['payment'])
             || !$handlingSubject['payment'] instanceof PaymentDataObjectInterface
         ) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
+            throw new InvalidArgumentException('Payment data object should be provided');
         }
 
         $paymentDO = $handlingSubject['payment'];
 
         $payment = $paymentDO->getPayment();
 
-        $payment->setTransactionId($response[self::TXN_ID]);
-        $payment->setIsTransactionClosed(false);
+        // Check if $payment is an instance of the expected interface or class
+        if ($payment instanceof Payment) {
+            $payment->setTransactionId($response[self::TXN_ID]);
+            $payment->setIsTransactionClosed(false);
+        } else {
+            throw new UnexpectedValueException('Payment object does not implement OrderPaymentInterface.');
+        }
     }
 }

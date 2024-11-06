@@ -5,6 +5,10 @@
 
 namespace Payfast\Payfast\Controller\Redirect;
 
+use Exception;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Result\PageFactory;
 use Payfast\Payfast\Controller\AbstractPayfast;
 
@@ -19,24 +23,19 @@ class Success extends AbstractPayfast
     /**
      * @var PageFactory
      */
-    protected $resultPageFactory;
+    protected PageFactory $resultPageFactory;
 
     /**
      * Execute: This method illustrate magento2 super power.
      */
-    public function execute()
+    public function execute(): ResultInterface|ResponseInterface
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
 
         try {
             return $this->_redirect('checkout/onepage/success', $this->_request->getParams());
-        } catch (\Magento\Framework\Exception\LocalizedException $e) {
-            $this->_logger->error($pre . $e->getMessage());
-            $this->messageManager->addExceptionMessage($e, $e->getMessage());
-
-            return $this->_redirect('checkout/cart');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_logger->error($pre . $e->getMessage());
             $this->messageManager->addExceptionMessage($e, __('We can\'t start Payfast Checkout.'));
 

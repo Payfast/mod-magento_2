@@ -7,117 +7,109 @@
 namespace Payfast\Payfast\Model;
 
 use Magento\Checkout\Model\Session;
-use Magento\Framework\Api\AttributeValueFactory;
-use Magento\Framework\Api\ExtensionAttributesFactory;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedExceptionFactory;
-use Magento\Framework\Model\Context;
-use Magento\Framework\Model\ResourceModel\AbstractResource;
-use Magento\Framework\Registry;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\UrlInterface;
-use Magento\Payment\Helper\Data;
-use Magento\Payment\Model\Method\Logger;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
-use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
-use Payfast\PayfastCommon;
 use Payfast\Payfast\Block\Form;
 use Payfast\Payfast\Block\Payment\Info;
-use Payfast\Payfast\Model\Config;
 use Magento\Framework\App\ProductMetadataInterface;
 use Payfast\Payfast\Logger\Logger as Monolog;
+use Magento\Sales\Model\Order;
 
 /**
  * Payfast Module.
  *
- * @method \Magento\Quote\Api\Data\PaymentMethodExtensionInterface getExtensionAttributes()
  */
 class Payfast
 {
     /**
      * @var string
      */
-    protected $_code = Config::METHOD_CODE;
+    protected string $_code = Config::METHOD_CODE;
 
     /**
      * @var string
      */
-    protected $_formBlockType = Form::class;
+    protected string $_formBlockType = Form::class;
 
     /**
      * @var string
      */
-    protected $_infoBlockType = Info::class;
+    protected string $_infoBlockType = Info::class;
 
     /**
      * @var string
      */
-    protected $_configType = Config::class;
+    protected string $_configType = Config::class;
 
     /**
      * Availability option
      *
      * @var bool
      */
-    protected $_canOrder = true;
+    protected bool $_canOrder = true;
 
     /**
      * Availability option
      *
      * @var bool
      */
-    protected $_canCapture = true;
+    protected bool $_canCapture = true;
 
     /**
      * Availability option
      *
      * @var bool
      */
-    protected $_canUseInternal = true;
+    protected bool $_canUseInternal = true;
 
     /**
      * Website Payments Pro instance
      *
      * @var Config $config
      */
-    protected $_config;
+    protected Config $_config;
 
     /**
      * @var StoreManagerInterface
      */
-    protected $_storeManager;
+    protected StoreManagerInterface $_storeManager;
 
     /**
      * @var UrlInterface
      */
-    protected $_urlBuilder;
+    protected UrlInterface $_urlBuilder;
 
     /**
      * @var Session
      */
-    protected $_checkoutSession;
+    protected Session $_checkoutSession;
 
     /**
      * @var LocalizedExceptionFactory
      */
-    protected $_exception;
+    protected LocalizedExceptionFactory $_exception;
 
     /**
      * @var TransactionRepositoryInterface
      */
-    protected $transactionRepository;
+    protected TransactionRepositoryInterface $transactionRepository;
 
     /**
      * @var BuilderInterface
      */
-    protected $transactionBuilder;
+    protected BuilderInterface $transactionBuilder;
     protected Monolog $payfastLogger;
 
     /**
@@ -128,6 +120,7 @@ class Payfast
      * @param LocalizedExceptionFactory $exception
      * @param TransactionRepositoryInterface $transactionRepository
      * @param BuilderInterface $transactionBuilder
+     * @param Monolog $payfastLogger
      */
     public function __construct(
         ConfigFactory $configFactory,
@@ -159,12 +152,12 @@ class Payfast
     /**
      * Store setter. Also updates store ID in config object
      *
-     * @param Store|int $store
+     * @param int|Store $store
      *
      * @return $this
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
-    public function setStore($store)
+    public function setStore(Store|int $store): static
     {
         $this->setData('store', $store);
 
@@ -183,7 +176,7 @@ class Payfast
      *
      * @return bool
      */
-    public function canUseForCurrency($currencyCode)
+    public function canUseForCurrency(string $currencyCode): bool
     {
         return $this->_config->isCurrencyCodeSupported($currencyCode);
     }
@@ -194,7 +187,7 @@ class Payfast
      * @return string
      * @see    \Magento\Sales\Model\Payment::place()
      */
-    public function getConfigPaymentAction()
+    public function getConfigPaymentAction(): string
     {
         return $this->_config->getPaymentAction();
     }
@@ -202,17 +195,19 @@ class Payfast
     /**
      * Check whether payment method can be used
      *
-     * @param CartInterface|Quote|null $quote
+     * @param CartInterface|null $quote
      *
      * @return bool
      */
-    public function isAvailable(CartInterface $quote = null)
+    public function isAvailable(CartInterface $quote = null): bool
     {
         return $this->_config->isMethodAvailable();
     }
 
     /**
      * This where we compile data posted by the form to payfast
+     *
+     * @var Order $order
      *
      * @return array
      */
@@ -303,9 +298,9 @@ class Payfast
      *
      * @param Order $order
      *
-     * @return float
+     * @return string
      */
-    public function getTotalAmount($order): string
+    public function getTotalAmount(Order $order): string
     {
         if ($this->_config->getValue('use_store_currency')) {
             $price = $this->getNumberFormat($order->getGrandTotal());
@@ -319,11 +314,11 @@ class Payfast
     /**
      * Formats the number
      *
-     * @param int $number
+     * @param float $number
      *
-     * @return float
+     * @return string
      */
-    public function getNumberFormat($number)
+    public function getNumberFormat(float $number): string
     {
         return number_format($number, 2, '.', '');
     }
@@ -333,7 +328,7 @@ class Payfast
      *
      * @return string
      */
-    public function getPaidSuccessUrl()
+    public function getPaidSuccessUrl(): string
     {
         return $this->_urlBuilder->getUrl('payfast/redirect/success', ['_secure' => true]);
     }
@@ -343,9 +338,9 @@ class Payfast
      *
      * @return string
      */
-    public function getOrderPlaceRedirectUrl()
+    public function getOrderPlaceRedirectUrl(): string
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->payfastLogger->info($pre . 'bof');
 
         return $this->_urlBuilder->getUrl('payfast/redirect');
@@ -358,9 +353,9 @@ class Payfast
      * @see    Quote\Payment::getCheckoutRedirectUrl()
      * @see    \Magento\Checkout\Controller\Onepage::savePaymentAction()
      */
-    public function getCheckoutRedirectUrl()
+    public function getCheckoutRedirectUrl(): string
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->payfastLogger->info($pre . 'bof');
 
         return $this->_urlBuilder->getUrl('payfast/redirect');
@@ -371,7 +366,7 @@ class Payfast
      *
      * @return string
      */
-    public function getPaidCancelUrl()
+    public function getPaidCancelUrl(): string
     {
         return $this->_urlBuilder->getUrl('payfast/redirect/cancel', ['_secure' => true]);
     }
@@ -385,7 +380,7 @@ class Payfast
      *
      * @return string
      */
-    public function getPaidNotifyUrl()
+    public function getPaidNotifyUrl(): string
     {
         return $this->_urlBuilder->getUrl('payfast/notify', ['_secure' => true]);
     }
@@ -395,7 +390,7 @@ class Payfast
      *
      * @return string
      */
-    public function getPayfastUrl()
+    public function getPayfastUrl(): string
     {
         return 'https://' . $this->getPayfastHost($this->_config->getValue('server')) . '/eng/process';
     }
@@ -407,10 +402,10 @@ class Payfast
      *
      * @return string
      */
-    public function getPayfastHost($serverMode)
+    public function getPayfastHost(string $serverMode): string
     {
         if (!in_array($serverMode, ['live', 'test'])) {
-            $pfHost = "payfast.{$serverMode}";
+            $pfHost = "payfast.$serverMode";
         } else {
             $pfHost = (($serverMode == 'live') ? 'www' : 'sandbox') . '.payfast.co.za';
         }
@@ -421,16 +416,16 @@ class Payfast
     /**
      * Get  the name of the store
      *
-     * @return mixed
+     * @return string
      */
-    protected function getStoreName()
+    protected function getStoreName(): string
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->payfastLogger->info($pre . 'bof');
 
         $storeName = $this->_config->getValue(
             'general/store_information/name',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         );
 
         $this->payfastLogger->info($pre . 'store name is ' . $storeName);
@@ -445,13 +440,17 @@ class Payfast
      *
      * @return false|TransactionInterface
      */
-    protected function getOrderTransaction($payment)
+    protected function getOrderTransaction(OrderPaymentInterface $payment): false|TransactionInterface
     {
-        return $this->transactionRepository->getByTransactionType(
-            Transaction::TYPE_ORDER,
-            $payment->getId(),
-            $payment->getOrder()->getId()
-        );
+        try {
+            return $this->transactionRepository->getByTransactionType(
+                TransactionInterface::TYPE_ORDER,
+                $payment->getId()
+            );
+        } catch (InputException $e) {
+            $this->payfastLogger->error($e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -461,7 +460,7 @@ class Payfast
      */
     private function getAppVersion(): string
     {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $objectManager = ObjectManager::getInstance();
         $version       = $objectManager->get(ProductMetadataInterface::class)->getVersion();
 
         return (preg_match('([0-9])', $version)) ? $version : '2.0.0';

@@ -5,6 +5,8 @@
 
 namespace Payfast\Payfast\Model;
 
+use Magento\Payment\Model\Cart\SalesModel\SalesModelInterface;
+
 /**
  * Payfast-specific model for shopping cart items and totals
  * The main idea is to accommodate all possible totals into Payfast-compatible 4 totals and line items
@@ -14,27 +16,22 @@ class Cart extends \Magento\Payment\Model\Cart
     /**
      * @var bool
      */
-    protected $_areAmountsValid = false;
+    protected bool $_areAmountsValid = false;
 
     /**
      * Get shipping, tax, subtotal and discount amounts all together
      *
      * @return array
      */
-    public function getAmounts()
+    public function getAmounts(): array
     {
+        // Call the parent method if applicable
+        parent::getAmounts();
+
         $this->_collectItemsAndAmounts();
 
         if (!$this->_areAmountsValid) {
-            $subtotal = $this->getSubtotal() + $this->getTax();
-
-            if (empty($this->_transferFlags[self::AMOUNT_SHIPPING])) {
-                $subtotal += $this->getShipping();
-            }
-
-            if (empty($this->_transferFlags[self::AMOUNT_DISCOUNT])) {
-                $subtotal -= $this->getDiscount();
-            }
+            $subtotal = $this->_calculateSubtotal();
 
             return [self::AMOUNT_SUBTOTAL => $subtotal];
         }
@@ -42,12 +39,28 @@ class Cart extends \Magento\Payment\Model\Cart
         return $this->_amounts;
     }
 
+    private function _calculateSubtotal(): float
+    {
+        $subtotal = $this->getSubtotal() + $this->getTax();
+
+        if (empty($this->_transferFlags[self::AMOUNT_SHIPPING])) {
+            $subtotal += $this->getShipping();
+        }
+
+        if (empty($this->_transferFlags[self::AMOUNT_DISCOUNT])) {
+            $subtotal -= $this->getDiscount();
+        }
+
+        return $subtotal;
+    }
+
+
     /**
      * Check whether any item has negative amount
      *
      * @return bool
      */
-    public function hasNegativeItemAmount()
+    public function hasNegativeItemAmount(): bool
     {
         foreach ($this->_customItems as $item) {
             if ($item->getAmount() < 0) {
@@ -63,7 +76,7 @@ class Cart extends \Magento\Payment\Model\Cart
      *
      * @return void
      */
-    protected function _calculateCustomItemsSubtotal()
+    protected function _calculateCustomItemsSubtotal(): void
     {
         parent::_calculateCustomItemsSubtotal();
         $this->_applyDiscountTaxCompensationWorkaround($this->_salesModel);
@@ -76,36 +89,21 @@ class Cart extends \Magento\Payment\Model\Cart
      *
      * @return void
      */
-    protected function _validate()
+    protected function _validate(): void
     {
         $areItemsValid          = false;
         $this->_areAmountsValid = false;
 
         $referenceAmount = $this->_salesModel->getDataUsingMethod('base_grand_total');
-
-        $itemsSubtotal = 0;
-        foreach ($this->getAllItems() as $i) {
-            $itemsSubtotal = $itemsSubtotal + $i->getQty() * $i->getAmount();
-        }
+        $itemsSubtotal = $this->_calculateItemsSubtotal();
 
         $sum = $itemsSubtotal + $this->getTax();
-
-        if (empty($this->_transferFlags[self::AMOUNT_SHIPPING])) {
-            $sum += $this->getShipping();
-        }
-
-        if (empty($this->_transferFlags[self::AMOUNT_DISCOUNT])) {
-            $sum                    -= $this->getDiscount();
-            $this->_areAmountsValid = round($this->getDiscount(), 4) < round($itemsSubtotal, 4);
-        } else {
-            $this->_areAmountsValid = $itemsSubtotal > 0.00001;
-        }
+        $sum = $this->_applyShippingAndDiscounts($sum, $itemsSubtotal);
 
         /**
-         * numbers are intentionally converted to strings because of possible comparison error
+         * Numbers are intentionally converted to strings because of possible comparison error
          * see http://php.net/float
          */
-        // match sum of all the items and totals to the reference amount
         if (sprintf('%.4F', $sum) == sprintf('%.4F', $referenceAmount)) {
             $areItemsValid = true;
         }
@@ -118,13 +116,56 @@ class Cart extends \Magento\Payment\Model\Cart
         }
     }
 
+    private function _calculateItemsSubtotal(): float
+    {
+        $itemsSubtotal = 0;
+        foreach ($this->getAllItems() as $i) {
+            $itemsSubtotal += $i->getQty() * $i->getAmount();
+        }
+        return $itemsSubtotal;
+    }
+
+    private function _applyShippingAndDiscounts(float $sum, float $itemsSubtotal): float
+    {
+        $sum = $this->_applyAdjustment($sum);
+
+        return $this->_applyDiscount($sum, $itemsSubtotal);
+    }
+
+    private function _applyAdjustment(float $sum): float
+    {
+        if (empty($this->_transferFlags[self::AMOUNT_SHIPPING])) {
+            if ('shipping' === 'shipping') {
+                $sum += $this->getShipping();
+            } elseif ('shipping' === 'discount') {
+                $sum -= $this->getDiscount();
+            }
+        }
+        return $sum;
+    }
+
+    private function _applyDiscount(float $sum, float $itemsSubtotal): float
+    {
+        if (empty($this->_transferFlags[self::AMOUNT_DISCOUNT])) {
+            $sum -= $this->getDiscount();
+            $this->_areAmountsValid = round($this->getDiscount(), 4) < round($itemsSubtotal, 4);
+        } else {
+            $this->_areAmountsValid = $itemsSubtotal > 0.00001;
+        }
+
+        return $sum;
+    }
+
+
     /**
      * Import items from sales model with workarounds for Payfast
      *
      * @return void
      */
-    protected function _importItemsFromSalesModel()
+    protected function _importItemsFromSalesModel(): void
     {
+        parent::_importItemsFromSalesModel();
+
         $this->_salesModelItems = [];
 
         foreach ($this->_salesModel->getAllItems() as $item) {
@@ -182,13 +223,13 @@ class Cart extends \Magento\Payment\Model\Cart
      * - Create a cart price rule with % discount applied to the Shipping Amount
      * - run shopping cart and estimate shipping
      *
-     * @param \Magento\Payment\Model\Cart\SalesModel\SalesModelInterface $salesEntity
+     * @param SalesModelInterface $salesEntity
      *
      * @return void
      */
     protected function _applyDiscountTaxCompensationWorkaround(
-        \Magento\Payment\Model\Cart\SalesModel\SalesModelInterface $salesEntity
-    ) {
+        SalesModelInterface $salesEntity
+    ): void {
         $dataContainer = $salesEntity->getTaxContainer();
         $this->addTax((double)$dataContainer->getBaseDiscountTaxCompensationAmount());
         $this->addTax((double)$dataContainer->getBaseShippingDiscountTaxCompensationAmnt());

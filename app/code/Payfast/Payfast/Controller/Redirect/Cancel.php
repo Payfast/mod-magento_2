@@ -5,8 +5,13 @@
 
 namespace Payfast\Payfast\Controller\Redirect;
 
+use Exception;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Sales\Model\Order;
 use Payfast\Payfast\Controller\AbstractPayfast;
 
 /**
@@ -20,14 +25,14 @@ class Cancel extends AbstractPayfast
     /**
      * @var PageFactory
      */
-    protected $resultPageFactory;
+    protected PageFactory $resultPageFactory;
 
     /**
      * Execute: This method illustrate magento2 super power.
      */
-    public function execute()
+    public function execute(): Page|ResultInterface|ResponseInterface
     {
-        $pre = __METHOD__ . " : ";
+        $pre = __METHOD__ . ' : ';
         $this->_logger->debug($pre . 'bof');
         $page_object = $this->pageFactory->create();
 
@@ -37,8 +42,9 @@ class Cancel extends AbstractPayfast
 
             $this->messageManager->addNoticeMessage('You have successfully canceled the order using Payfast Checkout.');
 
-            if ($this->_order->getId() && $this->_order->getState() != \Magento\Sales\Model\Order::STATE_CANCELED) {
-                $this->_order->registerCancellation('Cancelled by user from ' . $this->_configMethod)->save();
+            if ($this->_order->getId() && $this->_order->getState() != Order::STATE_CANCELED) {
+                $this->_order->registerCancellation('Cancelled by user from ' . $this->_configMethod);
+                $this->orderRepository->save($this->_order);
             }
 
             $this->checkoutSession->restoreQuote();
@@ -49,7 +55,7 @@ class Cancel extends AbstractPayfast
 
             $this->messageManager->addExceptionMessage($e, $e->getMessage());
             $this->_redirect('checkout/cart');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_logger->error($pre . $e->getMessage());
             $this->messageManager->addExceptionMessage($e, __('We can\'t start Payfast Checkout.'));
             $this->_redirect('checkout/cart');

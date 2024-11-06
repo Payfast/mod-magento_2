@@ -6,18 +6,22 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Monolog\Handler\HandlerInterface;
 use Payfast\Payfast\Model\Config;
 use Payfast\Payfast\Model\ConfigFactory;
+use Throwable;
 
+/**
+ * Logger class
+ */
 class Logger extends \Monolog\Logger
 {
     /**
      * @var ScopeConfigInterface
      */
-    protected $scopeConfig;
+    protected ScopeConfigInterface $scopeConfig;
 
     /**
      * @var string Path to the configuration setting
      */
-    protected $configPath = 'debug';
+    protected string $configPath = 'debug';
     /**
      * @var Config
      */
@@ -36,8 +40,8 @@ class Logger extends \Monolog\Logger
         ScopeConfigInterface $scopeConfig,
         ConfigFactory $configFactory,
         string $name,
-        array $handlers = array(),
-        array $processors = array()
+        array $handlers = [],
+        array $processors = []
     ) {
         $this->scopeConfig = $scopeConfig;
         parent::__construct($name, $handlers, $processors);
@@ -50,12 +54,12 @@ class Logger extends \Monolog\Logger
     /**
      * Logs with an arbitrary level.
      *
-     * @param string|\Throwable $message
+     * @param string|Throwable $message
      * @param array $context
      *
      * @return void
      */
-    public function info($message, array $context = array()): void
+    public function info($message, array $context = []): void
     {
         if ($this->isLoggingEnabled() === '1') {
             parent::info($message, $context);

@@ -6,13 +6,16 @@ use Magento\Payment\Gateway\Http\TransferBuilder;
 use Magento\Payment\Gateway\Http\TransferFactoryInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 
+/**
+ * TransferFactory class
+ */
 class TransferFactory implements TransferFactoryInterface
 {
 
     /**
      * @var TransferBuilder
      */
-    private $transferBuilder;
+    private TransferBuilder $transferBuilder;
 
     /**
      * @param TransferBuilder $transferBuilder
@@ -30,7 +33,7 @@ class TransferFactory implements TransferFactoryInterface
      *
      * @return TransferInterface
      */
-    public function create(array $request)
+    public function create(array $request): TransferInterface
     {
         return $this->transferBuilder
             ->setBody($request)
